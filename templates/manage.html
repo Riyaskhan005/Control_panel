@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block body %}       
+      <!--  Header End -->
+      <div class="position-relative">
+        <!-- Circle Button -->
+        <button class="btn btn-primary rounded-circle position-absolute d-flex align-items-center justify-content-center" id="openModalBtn"
+        style="top: -40px; left: -40px; width: 60px; height: 60px;">
+        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
+        </button>
+      
+        <!-- Card -->
+        <div class="card">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-12">
+                <!-- DataTable -->
+                <table id="customerTable" class="table table-striped table-bordered">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Customer Name</th>
+                      <th>Today Special</th>
+                      <th>Total Amount</th>
+                      <th>Payment Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Modal -->
+          <!-- Modal -->
+    <div class="modal fade" id="specialModal" tabindex="-1" aria-labelledby="specialModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="specialModalLabel">Add Entry</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Input Fields for the New Entry -->
+            <div class="mb-3">
+              <label for="customerName" class="form-label">Customer Name</label>
+              <input type="text" class="form-control" id="customerName" placeholder="Enter Customer Name">
+            </div>
+            <div class="mb-3">
+              <label for="todaySpecial" class="form-label">Today Special</label>
+              <input type="text" class="form-control" id="todaySpecial" placeholder="Enter Today Special">
+            </div>
+            <div class="mb-3">
+              <label for="totalAmount" class="form-label">Total Amount</label>
+              <input type="number" class="form-control" id="totalAmount" placeholder="Enter Total Amount">
+            </div>
+            <div class="mb-3">
+              <label for="paymentStatus" class="form-label">Payment Status</label>
+              <select class="form-select" id="paymentStatus">
+                <option value="Paid">Paid</option>
+                <option value="Unpaid">Unpaid</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="saveButton" onclick="saveSpecial()">Save</button>
+            <button type="button" class="btn btn-warning" id="updateButton" style="display:none;" onclick="updateSpecial()">Update</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+      </div>
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
+     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
+
+<script>
+  $(document).ready(function() {
+     loadData();
+    // Initialize the DataTable
+    function loadData() {
+    $('#customerTable').DataTable({
+      "ajax": {
+        "url": "/getdata",
+        "type": "GET",
+        "dataSrc": "data" 
+      },
+      "columns": [
+      { 
+      "data": null,
+        "render": function(data, type, row, meta) {
+            return meta.row + 1;
+        },
+        },
+        { "data": "customer_name" },
+        { "data": "today_special" },
+        { "data": "total_amount" },
+        { "data": "payment_status" },
+        {
+          "data": "id", 
+          "render": function(data, type, row) {
+            return `
+              <button class="btn btn-outline-warning btn-sm m-1" data-id="${data}" data-name="${row.customer_name}" onclick="editCustomer(${data}, '${row.customer_name}')"><i class="ti ti-pencil"></i></button>
+              <button class="btn btn-outline-danger btn-sm m-1" data-id="${data}" onclick="deleteCustomer(${data})"><i class="ti ti-trash"></i></button>
+            `;
+          }
+        }
+      ],
+      "destroy": true, 
+      "initComplete": function() {
+                const searchInput = $('#customerTable_filter input');
+                searchInput.attr("placeholder", "Search here...");
+            }
+    });
+  }
+
+    $('#openModalBtn').click(function() {
+      $('#specialModal').modal('show');
+    });
+
+    $('#saveSpecialBtn').click(function() {
+      var special = $('#specialInput').val();
+      if (special) {
+        alert("Special saved: " + special);
+        $('#specialModal').modal('hide');
+      } else {
+        alert("Please enter a special for today.");
+      }
+    });
+  });
+
+  function saveSpecial() {
+    var customerName = $('#customerName').val();
+    var todaySpecial = $('#todaySpecial').val();
+    var totalAmount = $('#totalAmount').val();
+    var paymentStatus = $('#paymentStatus').val();
+
+    if (!customerName) {
+        showAlert('Please enter the Customer Name.', 'danger');
+        return;
+    }
+    if (!todaySpecial) {
+        showAlert('Please enter the Today Special.', 'danger');
+        return;
+    }
+    if (!totalAmount) {
+        showAlert('Please enter the Total Amount.', 'danger');
+        return;
+    }
+    if (!paymentStatus) {
+        showAlert('Please select the Payment Status.', 'danger');
+        return;
+    }
+
+    $.ajax({
+        url: '/savedata',
+        type: 'POST',
+        data: {
+            customerName: customerName,
+            todaySpecial: todaySpecial,
+            totalAmount: totalAmount,
+            paymentStatus: paymentStatus
+        },
+        success: function(response) {
+            // Show success alert
+            showAlert('Special saved successfully!', 'success');
+
+            $('#specialModal').modal('hide');
+            $('#customerTable').DataTable().ajax.reload();
+        },
+        error: function(xhr, status, error) {
+            showAlert('An error occurred while saving the special.', 'danger');
+        }
+    });
+}
+$('#specialModal').on('hidden.bs.modal', function () {
+      $('#customerName').val('');
+      $('#todaySpecial').val('');
+      $('#totalAmount').val('');
+      $('#paymentStatus').val('Paid');
+      $('#specialModalLabel').text('Add Entry');
+    });
+
+    function deleteCustomer(id) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you really want to delete this?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '/deletecustomer',
+                type: 'DELETE',
+                contentType: 'application/json',
+                data: JSON.stringify({ id: id }), 
+                success: function(response) {
+                  showAlert('Customer deleted successfully!', 'success');
+                    $('#customerTable').DataTable().ajax.reload(); 
+                },
+                error: function(xhr, status, error) {
+                  showAlert('An error occurred while deleting the customer.', 'danger');
+                }
+            });
+        }
+    });
+}
+
+function editCustomer(id, customerName) {
+    $('#specialModal').modal('show');
+    $('#specialModalLabel').text('Edit Entry');
+    $('#specialModal').data('customerId', id); 
+
+    $.ajax({
+        url: '/getdata',
+        type: 'GET',
+        success: function(response) {
+            if (response && response.data) {
+                var customerData = response.data.find(customer => customer.id === id);
+
+                if (customerData) {
+                    $('#customerName').val(customerData.customer_name);
+                    $('#todaySpecial').val(customerData.today_special);
+                    $('#totalAmount').val(customerData.total_amount);
+                    $('#paymentStatus').val(customerData.payment_status);
+                    
+                    $('#saveButton').hide();
+                    $('#updateButton').show();
+                } else {
+                    showAlert('Customer data not found!', 'danger');
+                }
+            } else {
+                showAlert('Failed to fetch customer data.', 'danger');
+            }
+        },
+        error: function(xhr, status, error) {
+            showAlert('An error occurred while fetching customer data.', 'danger');
+        }
+    });
+}
+
+function updateSpecial() {
+    var customerName = $('#customerName').val();
+    var todaySpecial = $('#todaySpecial').val();
+    var totalAmount = $('#totalAmount').val();
+    var paymentStatus = $('#paymentStatus').val();
+    var customerId = $('#specialModal').data('customerId');
+
+    if (!customerName) {
+        showAlert('Please enter the Customer Name.', 'danger');
+        return;
+    }
+    if (!todaySpecial) {
+        showAlert('Please enter the Today Special.', 'danger');
+        return;
+    }
+    if (!totalAmount) {
+        showAlert('Please enter the Total Amount.', 'danger');
+        return;
+    }
+    if (!paymentStatus) {
+        showAlert('Please select the Payment Status.', 'danger');
+        return;
+    }
+
+    $.ajax({
+        url: '/updatecustomer',  
+        type: 'POST',
+        data: {
+            id: customerId, 
+            customerName: customerName,
+            todaySpecial: todaySpecial,
+            totalAmount: totalAmount,
+            paymentStatus: paymentStatus
+        },
+        success: function(response) {
+            showAlert('Customer updated successfully!', 'success');
+
+            $('#specialModal').modal('hide');
+            $('#customerTable').DataTable().ajax.reload();
+        },
+        error: function(xhr, status, error) {
+            showAlert('An error occurred while updating the customer.', 'danger');
+        }
+    });
+}
+</script>
+      
+    
+      {% endblock %} 

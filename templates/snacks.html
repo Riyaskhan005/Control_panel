@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block body %} 
+<!-- Font Awesome CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+      <!--  Header End -->
+<div class="position-relative">
+     <!-- Circle Button -->
+    <button class="btn btn-primary rounded-circle position-absolute d-flex align-items-center justify-content-center" id="specialModalBtn"
+        style="top: -40px; left: -40px; width: 60px; height: 60px;">
+        <i class="fas fa-hamburger fa-lg"></i> <!-- Burger icon -->
+    </button>
+    <button class="btn btn-success rounded-circle position-absolute d-flex align-items-center justify-content-center" id="pickedBtn"
+        style="top: -40px; right: -40px; width: 60px; height: 60px;">
+        <i class="fas fa-check-circle fa-lg"></i> <!-- Tick icon -->
+    </button>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="mt-4 mb-2">Recently Added Snacks</h5>
+            <div class="row" id="snackContainer">
+                <!-- New info-boxes will be added here -->
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="specialModal" tabindex="-1" aria-labelledby="specialModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="specialModalLabel">Add Snack</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="snackForm">
+                    <div class="mb-3">
+                        <label for="snackName" class="form-label">Snack Name</label>
+                        <input type="text" class="form-control" id="snackName" placeholder="Enter snack name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="snackPrice" class="form-label">Price</label>
+                        <input type="number" class="form-control" id="snackPrice" placeholder="Enter price">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="savebtn"onclick="saveSpecialSnack()">Add</button>
+                <button type="button" class="btn btn-primary"id="updatebtn"onclick="updateSpecialSnack()"style="display:none;">update</button>
+            </div>
+        </div>
+    </div>
+</div>
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
+     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
+      <script>
+        $(document).ready(function() {
+          loadSnacks()
+
+        });
+
+        $('#specialModalBtn').click(function() {
+      $('#specialModal').modal('show');
+    });
+
+    function loadSnacks() {
+    $.ajax({
+        url: '/getsnack',
+        type: 'GET',
+        success: function (response) {
+            if (response.data) {
+                $('#snackContainer').empty();
+              
+                response.data.forEach(function (snack, index) {
+                  let snackName = snack.snacks_name.toLowerCase();
+                  let icon;
+
+                 
+                  if (snackName.includes("chai")) {
+                      icon =  `<i class="fas fa-mug-hot"></i>`; 
+                  } else if (snackName.includes("burger")) {
+                      icon = `<i class="fas fa-hamburger"></i>`;
+                  } else if (snackName.includes("shawarma")||snackName.includes("roll")) {
+                      icon = `<img src="../static/images/roll.svg" alt="Shawarma Icon" width="50" height="50">`; 
+                  } else if (snackName.includes("toast")) {
+                      icon = `<i class="fas fa-bread-slice"></i>`;
+                  } else if (snackName.includes("fried rice") || snackName.includes("noodles")) {
+                  icon = `<i class="fas fa-bowl-food"></i>`; 
+                  } else {
+                      icon =`<i class="fas fa-pizza-slice"></i>`;
+                  }
+
+                  var infoBox = `
+                            <div class="col-md-3 col-sm-6 col-12">
+                                <div class="info-box bg-info d-flex align-items-center">
+                                    <span class="info-box-icon">${icon}</span>
+                                    <div class="info-box-content flex-grow-1">
+                                        <span class="info-box-text">${snack.snacks_name}</span>
+                                        <span class="info-box-number">₹${parseFloat(snack.snack_price).toFixed(2)}</span>
+                                    </div>
+                                    <div class="info-box-actions d-flex">
+                                        <button class="btn btn-sm text" onclick="editSnack('${snack.id}')">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </button>
+                                        <button class="btn btn-sm text" onclick="deleteSnack('${snack.id}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        
+
+                    $('#snackContainer').append(infoBox);
+                });
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error fetching snacks:", error);
+            showAlert('Failed to load snacks.', 'danger');
+        }
+    });
+}
+$('#specialModal').on('hidden.bs.modal', function () {
+      $('#snackName').val('');
+      $('#snackPrice').val('');
+      $('#specialModalLabel').text('Add Snack');
+    });
+
+    function saveSpecialSnack() {
+        var snackName = $('#snackName').val();
+        var snackPrice = $('#snackPrice').val();
+
+        if (!snackName) {
+            showAlert('Please enter the Snack Name.', 'danger');
+            return;
+        }
+        if (!snackPrice) {
+            showAlert('Please enter the Snack Price.', 'danger');
+            return;
+        }
+
+        $.ajax({
+            url: '/savesnack',
+            type: 'POST',
+            data: {
+                snackName: snackName,
+                snackPrice: snackPrice
+            },
+            success: function(response) {
+                showAlert('Snack saved successfully!', 'success');
+                loadSnacks()
+
+                $('#specialModal').modal('hide');
+                $('#snackForm')[0].reset();
+            },
+            error: function(xhr, status, error) {
+                showAlert('An error occurred while saving the snack.', 'danger');
+            }
+        });
+    }
+
+    function editSnack(id) {
+    $('#specialModal').modal('show');
+    $('#specialModalLabel').text('Edit Snack');
+
+    $('#specialModal').data('snackId', id); 
+
+    $.ajax({
+        url: '/getsnack',
+        type: 'GET',
+        success: function(response) {
+            if (response && response.data) {
+                var snackData = response.data.find(snack => snack.id == id);
+                if (snackData) {
+                    $('#snackName').val(snackData.snacks_name);
+                    $('#snackPrice').val(snackData.snack_price);
+
+                    $('#savebtn').hide();
+                    $('#updatebtn').show();
+                } else {
+                    showAlert('Snack data not found!', 'danger');
+                }
+            } else {
+                showAlert('Failed to fetch Snack data.', 'danger');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.log("Error fetching snack data:", xhr.responseText);
+            showAlert('An error occurred while fetching Snack data.', 'danger');
+        }
+    });
+}
+
+
+function updateSpecialSnack() {
+    var snackName = $('#snackName').val();
+    var snackPrice = $('#snackPrice').val();
+    var id = $('#specialModal').data('snackId');
+
+    if (!snackName) {
+        showAlert('Please enter the Snack Name.', 'danger');
+        return;
+    }
+    if (!snackPrice) {
+        showAlert('Please enter the Snack Price.', 'danger');
+        return;
+    }
+
+    $.ajax({
+        url: '/updatesnack',
+        type: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            id: id,
+            snackName: snackName,
+            snackPrice: snackPrice
+        }),
+        success: function(response) {
+            showAlert('Snack updated successfully!', 'success');
+            loadSnacks();
+            $('#specialModal').modal('hide');
+        },
+        error: function(xhr, status, error) {
+            console.log("Error updating snack:", xhr.responseText);
+            showAlert('An error occurred while updating the snack.', 'danger');
+        }
+    });
+}
+    function deleteSnack(id) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you really want to delete this?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '/deletesnack',
+                type: 'DELETE',
+                contentType: 'application/json',
+                data: JSON.stringify({ id: id }), 
+                success: function(response) {
+                  showAlert('Snack deleted successfully!', 'success');
+                  loadSnacks(); 
+                },
+                error: function(xhr, status, error) {
+                  showAlert('An error occurred while deleting the Snack.', 'danger');
+                }
+            });
+        }
+    });
+}
+
+      </script>
+{%endblock%}
