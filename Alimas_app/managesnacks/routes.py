@@ -1,8 +1,8 @@
 from flask import Flask, render_template,request,jsonify
 from Alimas_app.extensions import db
 from Alimas_app.managesnacks import bp
-from models.manage import CustomerEntry,SnackEntry
-from utils.logwritter import LogWriter 
+from Alimas_app.models.manage import SnackEntry
+from Alimas_app.utils.logwritter import LogWriter 
 logger = LogWriter()
 
 
