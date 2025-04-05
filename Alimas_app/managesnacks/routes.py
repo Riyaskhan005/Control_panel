@@ -7,7 +7,7 @@ logger = LogWriter()
 
 
 @bp.route('/')
-def todayspecial():
+def index():
     return render_template("snacks.html")
 
 

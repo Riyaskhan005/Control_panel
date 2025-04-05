@@ -7,7 +7,7 @@ logger = LogWriter()
 
 
 @bp.route('/')
-def user():
+def index():
     return render_template("manage.html")
 
 @bp.route('/getdata', methods=['GET'])
