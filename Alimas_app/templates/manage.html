@@ -84,7 +84,7 @@
     function loadData() {
     $('#customerTable').DataTable({
       "ajax": {
-        "url": "/getdata",
+        "url": "/user/getdata",
         "type": "GET",
         "dataSrc": "data" 
       },
@@ -156,7 +156,7 @@
     }
 
     $.ajax({
-        url: '/savedata',
+        url: '/user/savedata',
         type: 'POST',
         data: {
             customerName: customerName,
@@ -196,7 +196,7 @@ $('#specialModal').on('hidden.bs.modal', function () {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: '/deletecustomer',
+                url: '/user/deletecustomer',
                 type: 'DELETE',
                 contentType: 'application/json',
                 data: JSON.stringify({ id: id }), 
@@ -218,7 +218,7 @@ function editCustomer(id, customerName) {
     $('#specialModal').data('customerId', id); 
 
     $.ajax({
-        url: '/getdata',
+        url: '/user/getdata',
         type: 'GET',
         success: function(response) {
             if (response && response.data) {
@@ -270,7 +270,7 @@ function updateSpecial() {
     }
 
     $.ajax({
-        url: '/updatecustomer',  
+        url: '/user/updatecustomer',  
         type: 'POST',
         data: {
             id: customerId, 

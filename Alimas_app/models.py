@@ -1,6 +1,6 @@
-from flask_sqlalchemy import SQLAlchemy
 
-db = SQLAlchemy()
+from Alimas_app.extensions import db
+
 
 class CustomerEntry(db.Model):
     __tablename__ = 'customer_entries'
@@ -23,7 +23,6 @@ class SnackEntry(db.Model):
     snacks_name = db.Column(db.String(255), nullable=False)
     today_special = db.Column(db.String(255), nullable=False)
     snack_price = db.Column(db.Float, nullable=False)
-    today_special = db.Column(db.Boolean, nullable=False, default=False)
     # created_on = db.Column(DateTime, nullable=False, default=func.now())
     status = db.Column(db.String(20), nullable=False, default="Active")
 
