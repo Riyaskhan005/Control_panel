@@ -1,7 +1,7 @@
 from flask import Flask, render_template,request,jsonify
 from Alimas_app.extensions import db
 from Alimas_app.managecustomers import bp
-from models.models import CustomerEntry
+from models.manage import CustomerEntry
 from utils.logwritter import LogWriter 
 logger = LogWriter()
 
