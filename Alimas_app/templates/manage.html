@@ -48,7 +48,13 @@
             </div>
             <div class="mb-3">
               <label for="todaySpecial" class="form-label">Today Special</label>
-              <input type="text" class="form-control" id="todaySpecial" placeholder="Enter Today Special">
+              <select id="snackSelect" multiple>
+                <option value="pizza">Pizza</option>
+                <option value="burger">Burger</option>
+                <option value="fries">Fries</option>
+                <option value="icecream">Ice Cream</option>
+                <option value="wings">Chicken Wings</option>
+              </select>
             </div>
             <div class="mb-3">
               <label for="totalAmount" class="form-label">Total Amount</label>
@@ -77,7 +83,15 @@
       <script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
      <link rel="stylesheet" href="https://cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
 
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
 <script>
+   new Choices('#snackSelect', {
+    removeItemButton: true,
+    placeholder: true,
+    placeholderValue: 'Select your snacks',
+  });
   $(document).ready(function() {
      loadData();
     // Initialize the DataTable

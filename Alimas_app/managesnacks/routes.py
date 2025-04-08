@@ -42,7 +42,7 @@ def save_snack():
         new_snack = SnackEntry(
             snacks_name=snack_name,
             snack_price=float(snack_price),
-            today_special=False
+            today_special='false'
         )
 
         db.session.add(new_snack)
@@ -101,4 +101,30 @@ def delete_snack():
     except Exception as e:
         db.session.rollback()
         logger.log_exception("app", "deletesnack", e)
+        return jsonify({'error': str(e)}), 500
+
+
+@bp.route('/updatespecial', methods=['POST'])
+def update_today_special():
+    try:
+        data = request.get_json()
+        snack_id = data.get('id')
+        today_special = data.get('today_special')
+
+        if snack_id is None or today_special is None:
+            return jsonify({'error': 'Snack ID and Today Special status are required!'}), 400
+
+        snack_entry = SnackEntry.query.get(snack_id)
+        if not snack_entry:
+            return jsonify({'error': 'Snack not found!'}), 404
+
+        # Update the today_special status
+        snack_entry.today_special = str(today_special).lower()  # store as 'true' or 'false'
+
+        db.session.commit()
+        return jsonify({'message': 'Today Special status updated successfully!'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        logger.log_exception("app", "update_today_special", e)
         return jsonify({'error': str(e)}), 500

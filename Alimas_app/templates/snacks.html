@@ -11,10 +11,6 @@
         style="top: -40px; left: -40px; width: 60px; height: 60px;">
         <i class="fas fa-hamburger fa-lg"></i> <!-- Burger icon -->
     </button>
-    <button class="btn btn-success rounded-circle position-absolute d-flex align-items-center justify-content-center" id="pickedBtn"
-        style="top: -40px; right: -40px; width: 60px; height: 60px;">
-        <i class="fas fa-check-circle fa-lg"></i> <!-- Tick icon -->
-    </button>
     <div class="card">
         <div class="card-body">
             <h5 class="mt-4 mb-2">Recently Added Snacks</h5>
@@ -91,25 +87,47 @@
                       icon =`<i class="fas fa-pizza-slice"></i>`;
                   }
 
-                  var infoBox = `
-                            <div class="col-md-3 col-sm-6 col-12">
-                                <div class="info-box bg-info d-flex align-items-center">
-                                    <span class="info-box-icon">${icon}</span>
-                                    <div class="info-box-content flex-grow-1">
-                                        <span class="info-box-text">${snack.snacks_name}</span>
-                                        <span class="info-box-number">₹${parseFloat(snack.snack_price).toFixed(2)}</span>
+                    let tagText = snack.today_special === "true" ? "Active" : "InActive";
+                    let tagClass = snack.today_special === "true" ? "badge bg-success" : "badge bg-warning text-dark";
+                    let isChecked = snack.today_special === "true" ? "checked" : "";
+                    let checkboxId = `specialCheck_${snack.id}`;
+                    let price = parseFloat(snack.snack_price).toFixed(2);
+
+                    var infoBox = `
+                        <div class="col-md-3 col-sm-6 col-12 mb-3">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-body d-flex flex-column">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="me-3" style="font-size: 2rem;">
+                                            ${icon}
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1 d-flex justify-content-between align-items-center">
+                                                <span>${snack.snacks_name}</span>
+                                                <span class="${tagClass}" style="font-size: 0.75rem;">${tagText}</span>
+                                            </h6>
+                                            <small class="text-muted">₹${price}</small>
+                                        </div>
                                     </div>
-                                    <div class="info-box-actions d-flex">
-                                        <button class="btn btn-sm text" onclick="editSnack('${snack.id}')">
+                                    <div class="form-check mb-3 ms-1">
+                                        <input class="form-check-input" type="checkbox" id="${checkboxId}" ${isChecked}
+                                            onchange="toggleSpecial('${snack.id}', this.checked)">
+                                        <label class="form-check-label small" for="${checkboxId}">
+                                            Today Special
+                                        </label>
+                                    </div>
+                                    <div class="mt-auto d-flex justify-content-end gap-2">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editSnack('${snack.id}')">
                                             <i class="fas fa-pencil-alt"></i>
                                         </button>
-                                        <button class="btn btn-sm text" onclick="deleteSnack('${snack.id}')">
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteSnack('${snack.id}')">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
                                 </div>
                             </div>
-                        `;
+                        </div>
+                    `;
                         
 
                     $('#snackContainer').append(infoBox);
@@ -119,6 +137,25 @@
         error: function (xhr, status, error) {
             console.error("Error fetching snacks:", error);
             showAlert('Failed to load snacks.', 'danger');
+        }
+    });
+}
+
+function toggleSpecial(snackId, isSpecial) {
+    $.ajax({
+        url: `/todayspecial/updatespecial`,
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            id: snackId,
+            today_special: isSpecial
+        }),
+        success: function(response) {
+            showAlert("Snack updated!", "success");
+            loadSnacks(); 
+        },
+        error: function() {
+            showAlert("Failed to update snack.", "danger");
         }
     });
 }
