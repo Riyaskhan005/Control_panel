@@ -1,7 +1,7 @@
 from flask import Flask, render_template,request,jsonify
 from Alimas_app.extensions import db
 from Alimas_app.managecustomers import bp
-from Alimas_app.models.manage import CustomerEntry
+from Alimas_app.models.manage import CustomerEntry,SnackEntry
 from Alimas_app.utils.logwritter import LogWriter 
 logger = LogWriter()
 
@@ -109,3 +109,22 @@ def delete_customer():
         logger.log_exception("app", "deletecustomer", e)
         return jsonify({'error': str(e)}), 500
     
+
+
+@bp.route('/getsnack', methods=['GET'])
+def get_snacks():
+    try:
+        entries = SnackEntry.query.filter_by(status="Active", today_special="true").all()
+        
+        data = []
+        for entry in entries:
+            data.append({
+                'id': entry.id,
+                'snacks_name': entry.snacks_name,
+                'snack_price': entry.snack_price,
+            })
+        
+        return jsonify({'data': data}), 200
+    except Exception as e:
+        logger.log_exception("app", "getsnacks", e)
+        return jsonify({'error': str(e)}), 500
