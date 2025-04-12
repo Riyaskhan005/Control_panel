@@ -32,13 +32,12 @@
           </div>
         </div>
         <!-- Modal -->
-          <!-- Modal -->
-    <div class="modal fade" id="specialModal" tabindex="-1" aria-labelledby="specialModalLabel" aria-hidden="true">
+      <div class="modal fade" id="specialModal" tabindex="-1" aria-labelledby="specialModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="specialModalLabel">Add Entry</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="cancel()"></button>
           </div>
           <div class="modal-body">
             <!-- Input Fields for the New Entry -->
@@ -64,7 +63,7 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="cancel()">Close</button>
             <button type="button" class="btn btn-primary" id="saveButton" onclick="saveSpecial()">Save</button>
             <button type="button" class="btn btn-warning" id="updateButton" style="display:none;" onclick="updateSpecial()">Update</button>
           </div>
@@ -246,7 +245,7 @@ const choices = new Choices(snackSelect, {
             // Show success alert
             showAlert('Special saved successfully!', 'success');
 
-            $('#specialModal').modal('hide');
+            cancel() 
             $('#customerTable').DataTable().ajax.reload();
         },
         error: function(xhr, status, error) {
@@ -254,13 +253,28 @@ const choices = new Choices(snackSelect, {
         }
     });
 }
-$('#specialModal').on('hidden.bs.modal', function () {
-      $('#customerName').val('');
-      $('#todaySpecial').val('');
-      $('#totalAmount').val('');
-      $('#paymentStatus').val('Paid');
-      $('#specialModalLabel').text('Add Entry');
-    });
+
+function cancel() {
+  $('#specialModalLabel').text('Add Entry');
+  $('#customerName').val('');
+  $('#totalAmount').val('');
+  $('#paymentStatus').val('Paid');
+  $('#saveButton').show();
+  $('#updateButton').hide();
+
+  // Clear Choices selection
+  choices.removeActiveItems();
+  choices.setChoiceByValue([]);
+
+  // Clear quantity inputs
+  $('#snackQuantities').empty();
+
+  // Optional: clear modal ID if using for edit tracking
+  $('#specialModal').removeData('customerId');
+
+  // Optional: clear custom total if tracked
+  $('#totalAmount').val('');
+}
 
     function deleteCustomer(id) {
     Swal.fire({
@@ -291,44 +305,115 @@ $('#specialModal').on('hidden.bs.modal', function () {
 }
 
 function editCustomer(id, customerName) {
-    $('#specialModal').modal('show');
-    $('#specialModalLabel').text('Edit Entry');
-    $('#specialModal').data('customerId', id); 
+  $('#specialModal').modal('show');
+  $('#specialModalLabel').text('Edit Entry');
+  $('#specialModal').data('customerId', id); 
 
-    $.ajax({
-        url: '/user/getdata',
-        type: 'GET',
-        success: function(response) {
-            if (response && response.data) {
-                var customerData = response.data.find(customer => customer.id === id);
+  $.ajax({
+    url: '/user/getdata',
+    type: 'GET',
+    success: function(response) {
+      if (response && response.data) {
+        var customerData = response.data.find(customer => customer.id === id);
 
-                if (customerData) {
-                    $('#customerName').val(customerData.customer_name);
-                    $('#todaySpecial').val(customerData.today_special);
-                    $('#totalAmount').val(customerData.total_amount);
-                    $('#paymentStatus').val(customerData.payment_status);
-                    
-                    $('#saveButton').hide();
-                    $('#updateButton').show();
-                } else {
-                    showAlert('Customer data not found!', 'danger');
+        if (customerData) {
+          $('#customerName').val(customerData.customer_name);
+          $('#totalAmount').val(customerData.total_amount);
+          $('#paymentStatus').val(customerData.payment_status);
+
+          // Parse snack string like: "Burger (2), Fries (1)"
+          const specialString = customerData.today_special;
+          const snackItems = specialString.split(',').map(item => {
+            const match = item.trim().match(/^(.+?)\s*\((\d+)\)$/); // Match name and quantity
+            return match ? { name: match[1], qty: parseInt(match[2]) } : null;
+          }).filter(item => item);
+
+          // Fetch available snacks, then match by name and set quantity
+          $.ajax({
+            url: '/user/getsnack',
+            method: 'GET',
+            success: function(snackResponse) {
+              const snacks = snackResponse.data;
+
+              choices.clearChoices();
+
+              const selectedSnackIds = [];
+              const idToQtyMap = {};
+
+              for (let i = 0; i < snacks.length; i++) {
+                const snack = snacks[i];
+
+                for (let j = 0; j < snackItems.length; j++) {
+                  if (snack.snacks_name.trim() === snackItems[j].name.trim()) {
+                    selectedSnackIds.push(snack.id);
+                    idToQtyMap[snack.id] = snackItems[j].qty;
+                    break;
+                  }
                 }
-            } else {
-                showAlert('Failed to fetch customer data.', 'danger');
-            }
-        },
-        error: function(xhr, status, error) {
-            showAlert('An error occurred while fetching customer data.', 'danger');
-        }
-    });
-}
+              }
 
+              // Set Choices
+              snacks.forEach(snack => {
+                choices.setChoices([{
+                  value: snack.id,
+                  label: `${snack.snacks_name} - $${snack.snack_price}`,
+                  selected: selectedSnackIds.includes(snack.id),
+                  disabled: false
+                }], 'value', 'label', false);
+              });
+
+              // Wait a moment then trigger input change to generate quantity boxes
+              setTimeout(() => {
+                $('#snackSelect').trigger('change');
+
+                // Set quantities after rendering inputs
+                setTimeout(() => {
+                  for (let i = 0; i < selectedSnackIds.length; i++) {
+                    const id = selectedSnackIds[i];
+                    $(`input[name="quantity_${id}"]`).val(idToQtyMap[id]);
+                  }
+                }, 200);
+              }, 100);
+            }
+          });
+
+          $('#saveButton').hide();
+          $('#updateButton').show();
+        } else {
+          showAlert('Customer data not found!', 'danger');
+        }
+      } else {
+        showAlert('Failed to fetch customer data.', 'danger');
+      }
+    },
+    error: function(xhr, status, error) {
+      showAlert('An error occurred while fetching customer data.', 'danger');
+    }
+  });
+}
 function updateSpecial() {
     var customerName = $('#customerName').val();
-    var todaySpecial = $('#todaySpecial').val();
     var totalAmount = $('#totalAmount').val();
     var paymentStatus = $('#paymentStatus').val();
     var customerId = $('#specialModal').data('customerId');
+
+    var selectedSnacks = choices.getValue();
+
+    var todaySpecialList = [];
+
+    for (var i = 0; i < selectedSnacks.length; i++) {
+    var snack = selectedSnacks[i];
+    var snackId = snack.value;
+    var label = snack.label; 
+    var snackName = label.split(' - $')[0];
+    var qty = $(`input[name="quantity_${snackId}"]`).val() || 0;
+
+    if (qty > 0) {
+      todaySpecialList.push(snackName + ' (' + qty + ')');
+    }
+    }
+
+    var todaySpecial = todaySpecialList.join(', ');
 
     if (!customerName) {
         showAlert('Please enter the Customer Name.', 'danger');
@@ -360,7 +445,7 @@ function updateSpecial() {
         success: function(response) {
             showAlert('Customer updated successfully!', 'success');
 
-            $('#specialModal').modal('hide');
+            cancel() 
             $('#customerTable').DataTable().ajax.reload();
         },
         error: function(xhr, status, error) {
