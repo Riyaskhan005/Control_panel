@@ -9,6 +9,7 @@ class CustomerEntry(db.Model):
     customer_name = db.Column(db.String(255), nullable=False)
     today_special = db.Column(db.String(255), nullable=False)
     total_amount = db.Column(db.Float, nullable=False)
+    paid_amount = db.Column(db.Float, nullable=False)
     payment_status = db.Column(db.String(50), nullable=False)
     # created_on = db.Column(DateTime, nullable=False, default=func.now())
     status = db.Column(db.String(20), nullable=False, default="Active")

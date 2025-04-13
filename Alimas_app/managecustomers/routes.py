@@ -22,7 +22,8 @@ def get_data():
                 'customer_name': entry.customer_name,
                 'today_special': entry.today_special,
                 'total_amount': entry.total_amount,
-                'payment_status': entry.payment_status
+                'payment_status': entry.payment_status,
+                'paid_amount': entry.paid_amount
             })
         
         return jsonify({'data': data}), 200
@@ -36,6 +37,7 @@ def save_data():
     today_special = request.form.get('todaySpecial')
     total_amount = request.form.get('totalAmount')
     payment_status = request.form.get('paymentStatus')
+    paid_amount = request.form.get('paidAmount')
 
     if not customer_name or not today_special or not total_amount or not payment_status:
         return jsonify({'error': 'All fields are required!'}), 400
@@ -44,7 +46,8 @@ def save_data():
         new_entry = CustomerEntry(
             customer_name=customer_name,
             today_special=today_special,
-            total_amount=float(total_amount), 
+            total_amount=float(total_amount),
+            paid_amount=paid_amount,  
             payment_status=payment_status
         )
 
@@ -68,6 +71,8 @@ def update_customer():
         today_special = request.form.get('todaySpecial')
         total_amount = request.form.get('totalAmount')
         payment_status = request.form.get('paymentStatus')
+        paid_amount = request.form.get('paidAmount')
+        print(paid_amount)
 
         # Find the customer entry by ID
         entry = CustomerEntry.query.get(customer_id)
@@ -75,6 +80,7 @@ def update_customer():
             entry.customer_name = customer_name
             entry.today_special = today_special
             entry.total_amount = float(total_amount)
+            entry.paid_amount =float(paid_amount)
             entry.payment_status = payment_status
 
             db.session.commit()

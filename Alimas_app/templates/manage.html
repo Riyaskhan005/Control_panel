@@ -22,6 +22,7 @@
                       <th>Customer Name</th>
                       <th>Today Special</th>
                       <th>Total Amount</th>
+                      <th>Paid Amount</th>
                       <th>Payment Status</th>
                       <th>Actions</th>
                     </tr>
@@ -52,14 +53,22 @@
             <div id="snackQuantities" class="mb-3"></div>
             <div class="mb-3">
               <label for="totalAmount" class="form-label">Total Amount</label>
-              <input type="number" class="form-control" id="totalAmount" placeholder="Enter Total Amount">
+              <input type="number" class="form-control" id="totalAmount" placeholder="Enter Total Amount" disabled>
             </div>
             <div class="mb-3">
               <label for="paymentStatus" class="form-label">Payment Status</label>
               <select class="form-select" id="paymentStatus">
                 <option value="Paid">Paid</option>
                 <option value="Unpaid">Unpaid</option>
+                <option value="Partial">Partially Paid</option>
               </select>
+            </div>
+            <div class="mb-3" id="partialPaymentContainer" style="display: none;">
+              <label for="partialAmount" class="form-label">Paid Amount</label>
+              <input type="number" class="form-control" id="partialAmount" placeholder="Enter Paid Amount">
+              <small id="remainingAmountLabel" class="form-text text-muted" style="display: none;">
+                Remaining Amount: ₹<span id="remainingValue">0</span>
+              </small>
             </div>
           </div>
           <div class="modal-footer">
@@ -153,6 +162,30 @@ const choices = new Choices(snackSelect, {
         alert("Please enter a special for today.");
       }
     });
+
+    $('#paymentStatus').on('change', function () {
+    if ($(this).val() === 'Partial') {
+      $('#partialPaymentContainer').show();
+    } else {
+      $('#partialPaymentContainer').hide();
+      $('#partialAmount').val('');
+      $('#remainingAmountLabel').hide();
+    }
+  });
+
+  // Calculate remaining amount when partial amount changes
+  $('#partialAmount, #totalAmount').on('input', function () {
+    const total = parseFloat($('#totalAmount').val()) || 0;
+    const paid = parseFloat($('#partialAmount').val()) || 0;
+    const remaining = total - paid;
+
+    if ($('#paymentStatus').val() === 'Partial' && paid >= 0 && total > 0) {
+      $('#remainingValue').text(remaining.toFixed(2));
+      $('#remainingAmountLabel').show();
+    } else {
+      $('#remainingAmountLabel').hide();
+    }
+  });
   });
 
   function loadData() {
@@ -172,7 +205,16 @@ const choices = new Choices(snackSelect, {
         { "data": "customer_name" },
         { "data": "today_special" },
         { "data": "total_amount" },
-        { "data": "payment_status" },
+        { "data": "paid_amount" },
+        {
+          "data": "payment_status",
+          "render": function(data) {
+            if (data === 'Paid') return '<span class="badge bg-success">Paid</span>';
+            if (data === 'Unpaid') return '<span class="badge bg-danger">Unpaid</span>';
+            if (data === 'Partial') return '<span class="badge bg-warning text-dark">Partial</span>';
+            return data;
+          }
+        },
         {
           "data": "id", 
           "render": function(data, type, row) {
@@ -232,6 +274,18 @@ const choices = new Choices(snackSelect, {
         return;
     }
 
+    var paidAmount = 0;
+    if (paymentStatus === "Paid") {
+        paidAmount = totalAmount;
+    } else if (paymentStatus === "Partial") {
+        paidAmount = parseFloat($('#partialAmount').val()) || 0;
+
+        if (paidAmount < 0 || paidAmount > totalAmount) {
+            showAlert('Please enter a valid Partial Paid Amount.', 'danger');
+            return;
+        }
+    }
+
     $.ajax({
         url: '/user/savedata',
         type: 'POST',
@@ -239,7 +293,8 @@ const choices = new Choices(snackSelect, {
             customerName: customerName,
             todaySpecial: todaySpecial,
             totalAmount: totalAmount,
-            paymentStatus: paymentStatus
+            paymentStatus: paymentStatus,
+            paidAmount: paidAmount 
         },
         success: function(response) {
             // Show success alert
@@ -255,6 +310,7 @@ const choices = new Choices(snackSelect, {
 }
 
 function cancel() {
+  $('#specialModal').modal('hide');
   $('#specialModalLabel').text('Add Entry');
   $('#customerName').val('');
   $('#totalAmount').val('');
@@ -274,6 +330,8 @@ function cancel() {
 
   // Optional: clear custom total if tracked
   $('#totalAmount').val('');
+  $('#partialAmount').val('').closest('.mb-3').hide();
+  $('#remainingAmountLabel').hide();  
 }
 
     function deleteCustomer(id) {
@@ -315,11 +373,25 @@ function editCustomer(id, customerName) {
     success: function(response) {
       if (response && response.data) {
         var customerData = response.data.find(customer => customer.id === id);
+        debugger
 
         if (customerData) {
           $('#customerName').val(customerData.customer_name);
           $('#totalAmount').val(customerData.total_amount);
           $('#paymentStatus').val(customerData.payment_status);
+
+          if (customerData.payment_status === 'Partial') {
+            $('#partialAmount').val(customerData.paid_amount);
+            $('#partialPaymentContainer').show();
+
+            // Update remaining amount label
+            const remaining = parseFloat(customerData.total_amount) - parseFloat(customerData.paid_amount);
+            $('#remainingAmountLabel').text(`Remaining: $${remaining.toFixed(2)}`).show();
+          } else {
+            $('#partialAmount').val('');
+            $('#partialPaymentContainer').hide();
+            $('#remainingAmountLabel').hide();
+          }
 
           // Parse snack string like: "Burger (2), Fries (1)"
           const specialString = customerData.today_special;
@@ -432,6 +504,21 @@ function updateSpecial() {
         return;
     }
 
+    var paidAmount = 0;
+    debugger
+    if (paymentStatus === "Paid") {
+        paidAmount = totalAmount;
+        $('#partialAmountWrapper').hide();
+    } else if (paymentStatus === "Partial") {
+        $('#partialAmountWrapper').show(); 
+        paidAmount = parseFloat($('#partialAmount').val()) || 0;
+
+        if (paidAmount < 0 || paidAmount > totalAmount) {
+            showAlert('Please enter a valid Partial Paid Amount.', 'danger');
+            return;
+        }
+    }
+
     $.ajax({
         url: '/user/updatecustomer',  
         type: 'POST',
@@ -440,7 +527,8 @@ function updateSpecial() {
             customerName: customerName,
             todaySpecial: todaySpecial,
             totalAmount: totalAmount,
-            paymentStatus: paymentStatus
+            paymentStatus: paymentStatus,
+            paidAmount: paidAmount 
         },
         success: function(response) {
             showAlert('Customer updated successfully!', 'success');
