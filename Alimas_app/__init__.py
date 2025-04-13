@@ -24,4 +24,7 @@ def create_app(config_class=Config):
     from Alimas_app.managesnacks import bp as managesnacks_bp
     app.register_blueprint(managesnacks_bp, url_prefix='/todayspecial')
 
+    from Alimas_app.customersdue import bp as customersdue_bp
+    app.register_blueprint(customersdue_bp, url_prefix='/customerdues')
+
     return app
