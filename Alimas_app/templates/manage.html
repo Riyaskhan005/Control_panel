@@ -92,23 +92,31 @@
 <script>
 
 $('#snackSelect').on('change', function () {
-  const selectedSnacks = choices.getValue(); 
+  const selectedSnacks = choices.getValue();
+  const existingQuantities = {};
+  $('.snack-qty-input').each(function () {
+    const name = $(this).attr('name').replace('quantity_', '');
+    const qty = $(this).val();
+    existingQuantities[name] = qty;
+  });
   $('#snackQuantities').empty(); 
   let rowDiv = $('<div class="row mb-2"></div>'); 
 
   selectedSnacks.forEach(function (snack, index) {
     const snackId = snack.value;
-    const [name, price] = snack.label.split(' - $');
+    const [name, price] = snack.label.split(' - ₹');
+    const savedQty = existingQuantities[snackId] || ''; 
 
-    const col = $(`
+    const col = $(` 
       <div class="col-md-4">
-        <label class="form-label">${name} ($${price})</label>
+        <label class="form-label">${name} (₹${price})</label>
         <input 
           type="number" 
           class="form-control snack-qty-input" 
           name="quantity_${snackId}" 
           placeholder="Qty" 
           min="1"
+          value="${savedQty}"
         />
       </div>
     `);
@@ -120,7 +128,23 @@ $('#snackSelect').on('change', function () {
       rowDiv = $('<div class="row mb-2"></div>'); 
     }
   });
+  calculateTotalAmount();
 });
+function calculateTotalAmount() {
+  let total = 0;
+
+  $('.snack-qty-input').each(function () {
+    const qty = parseInt($(this).val()) || 0;
+    const label = $(this).prev('label').text();
+    const priceMatch = label.match(/₹\d+(\.\d+)?/); 
+    const price = priceMatch ? parseFloat(priceMatch[0].replace('₹', '')) : 0;
+
+    total += price * qty;
+  });
+
+  $('#totalAmount').val(total.toFixed(2)); 
+  updateRemainingAmount();
+}
 
 $('#snackQuantities').on('input', '.snack-qty-input', function () {
   let total = 0;
@@ -128,8 +152,8 @@ $('#snackQuantities').on('input', '.snack-qty-input', function () {
   $('.snack-qty-input').each(function () {
     const qty = parseInt($(this).val()) || 0;
     const label = $(this).prev('label').text();
-    const priceMatch = label.match(/\$\d+(\.\d+)?/); 
-    const price = priceMatch ? parseFloat(priceMatch[0].replace('$', '')) : 0;
+    const priceMatch = label.match(/\₹\d+(\.\d+)?/); 
+    const price = priceMatch ? parseFloat(priceMatch[0].replace('₹', '')) : 0;
 
     total += price * qty;
   });
@@ -275,8 +299,8 @@ for (var i = 0; i < selectedSnacks.length; i++) {
   var snack = selectedSnacks[i];
   var snackId = snack.value;
   var label = snack.label; 
-  var snackName = label.split(' - $')[0];
-  var price = parseFloat(label.split('$')[1]) || 0;
+  var snackName = label.split(' - ₹')[0];
+  var price = parseFloat(label.split('₹')[1]) || 0;
   var qty = parseInt($(`input[name="quantity_${snackId}"]`).val()) || 0;
 
   if (qty > 0) {
@@ -395,7 +419,7 @@ function editCustomer(id, customer_name, total_amount, payment_status, paid_amou
   $('#updateButton').show();
   $('#specialModal').modal('show');
   $('#specialModalLabel').text('Edit Entry');
-  $('#specialModal').data('customerId', id); 
+  $('#specialModal').data('customerId', id);
 
   $('#customerName').val(customer_name);
   $('#totalAmount').val(total_amount);
@@ -412,13 +436,31 @@ function editCustomer(id, customer_name, total_amount, payment_status, paid_amou
 
   $('#partialAmount, #totalAmount').trigger('input');
 
-  const specialString = today_special;
-  const snackItems = specialString.split(',').map(item => {
-    const match = item.trim().match(/^(.+?)\s*\((\d+)\)$/);
-    return match ? { name: match[1], qty: parseInt(match[2]) } : null;
-  }).filter(item => item);
+  let selectedSnacks = [];
+  try {
+    selectedSnacks = JSON.parse(today_special);
+  } catch (e) {
+    console.error('Invalid today_special format:', today_special);
+  }
 
+  const selectedSnackNames = selectedSnacks.map(snack => snack.snackName);
 
+choices.clearChoices();
+const formattedChoices = selectedSnacks.map(snack => ({
+  value: snack.snackName,
+  label: `${snack.snackName} - ₹${snack.price}`,
+  selected: true,
+  disabled: false
+}));
+choices.setChoices(formattedChoices, 'value', 'label', true);
+
+fetchSnacks(selectedSnackNames);
+
+setTimeout(() => {
+  selectedSnacks.forEach(snack => {
+    $(`input[name="quantity_${snack.snackName}"]`).val(snack.quantity);
+  });
+}, 100);
 }
 
 function updateSpecial() {
@@ -435,8 +477,8 @@ for (var i = 0; i < selectedSnacks.length; i++) {
   var snack = selectedSnacks[i];
   var snackId = snack.value;
   var label = snack.label; 
-  var snackName = label.split(' - $')[0];
-  var price = parseFloat(label.split('$')[1]) || 0;
+  var snackName = label.split(' - ₹')[0];
+  var price = parseFloat(label.split('₹')[1]) || 0;
   var qty = parseInt($(`input[name="quantity_${snackId}"]`).val()) || 0;
 
   if (qty > 0) {
@@ -504,30 +546,30 @@ for (var i = 0; i < selectedSnacks.length; i++) {
     });
 }
 
-function fetchSnacks() {
-    $.ajax({
-      url: '/user/getsnack',
-      method: 'GET',
-      success: function(response) {
-        const snacks = response.data;
+function fetchSnacks(selectedSnackNames = []) {
+  $.ajax({
+    url: '/user/getsnack',
+    method: 'GET',
+    success: function(response) {
+      const snacks = response.data;
+      const filteredSnacks = snacks.filter(snack => !selectedSnackNames.includes(snack.snacks_name));
 
-        choices.clearChoices();
+      choices.clearChoices();
 
-      
-        snacks.forEach(snack => {
-          choices.setChoices([{
-            value: snack.id, 
-            label: `${snack.snacks_name} - $${snack.snack_price}`,
-            selected: false,
-            disabled: false
-          }], 'value', 'label', false);
-        });
-      },
-      error: function(xhr, status, error) {
-        console.error('Error fetching snacks:', error);
-      }
-    });
-  }
+      filteredSnacks.forEach(snack => {
+        choices.setChoices([{
+          value: snack.id,
+          label: `${snack.snacks_name} - ₹${snack.snack_price}`,
+          selected: false,
+          disabled: false
+        }], 'value', 'label', false);
+      });
+    },
+    error: function(xhr, status, error) {
+      console.error('Error fetching snacks:', error);
+    }
+  });
+}
 </script>
       
     
