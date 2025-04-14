@@ -77,11 +77,12 @@ def update_customer():
         paid_amount = request.form.get('paidAmount')
         print(paid_amount)
 
+        today_special_json = json.dumps(today_special)
         # Find the customer entry by ID
         entry = CustomerEntry.query.get(customer_id)
         if entry:
             entry.customer_name = customer_name
-            entry.today_special = today_special
+            entry.today_special = today_special_json
             entry.total_amount = float(total_amount)
             entry.paid_amount =float(paid_amount)
             entry.payment_status = payment_status
