@@ -210,7 +210,26 @@ function updateRemainingAmount() {
         },
         },
         { "data": "customer_name" },
-        { "data": "today_special" },
+        {
+          "data": "today_special",
+          "render": function(data) {
+            try {
+              if (typeof data === 'string' && data.trim().length > 0) {
+                if (data.startsWith('"') && data.endsWith('"')) {
+                  data = data.slice(1, -1);
+                }
+                data = data.replace(/\\"/g, '"');
+                const specials = JSON.parse(data);
+                return specials.map(s => `${s.snackName} (${s.quantity})`).join(', ');
+              } else {
+                return 'No specials available';
+              }
+            } catch (e) {
+              console.error('Error parsing today_special:', e);
+              return 'Error parsing specials'; 
+            }
+          }
+        },
         { "data": "total_amount" },
         { "data": "paid_amount" },
         {
@@ -225,8 +244,10 @@ function updateRemainingAmount() {
         {
           "data": "id", 
           "render": function(data, type, row) {
+            let todaySpecial = JSON.parse(row.today_special);
+            let todaySpecialStr = JSON.stringify(todaySpecial).replace(/"/g, '&quot;')
             return `
-              <button class="btn btn-outline-warning btn-sm m-1" data-id="${data}" data-name="${row.customer_name}" onclick="editCustomer(${data}, '${row.customer_name}')"><i class="ti ti-pencil"></i></button>
+               <button class="btn btn-outline-warning btn-sm m-1" data-id="${data}" data-name="${row.customer_name}" onclick="editCustomer(${data}, '${row.customer_name}', ${row.total_amount}, '${row.payment_status}','${row.paid_amount}','${todaySpecialStr}')"><i class="ti ti-pencil"></i></button>
               <button class="btn btn-outline-danger btn-sm m-1" data-id="${data}" onclick="deleteCustomer(${data})"><i class="ti ti-trash"></i></button>
             `;
           }
@@ -250,25 +271,28 @@ function updateRemainingAmount() {
 
     var todaySpecialList = [];
 
-  for (var i = 0; i < selectedSnacks.length; i++) {
-    var snack = selectedSnacks[i];
-    var snackId = snack.value;
-    var label = snack.label; 
-    var snackName = label.split(' - $')[0];
-    var qty = $(`input[name="quantity_${snackId}"]`).val() || 0;
+for (var i = 0; i < selectedSnacks.length; i++) {
+  var snack = selectedSnacks[i];
+  var snackId = snack.value;
+  var label = snack.label; 
+  var snackName = label.split(' - $')[0];
+  var price = parseFloat(label.split('$')[1]) || 0;
+  var qty = parseInt($(`input[name="quantity_${snackId}"]`).val()) || 0;
 
-    if (qty > 0) {
-      todaySpecialList.push(snackName + ' (' + qty + ')');
-    }
+  if (qty > 0) {
+    todaySpecialList.push({
+      snackName: snackName,
+      quantity: qty,
+      price: price
+    });
   }
-
-  var todaySpecial = todaySpecialList.join(', ');
+}
 
     if (!customerName) {
         showAlert('Please enter the Customer Name.', 'danger');
         return;
     }
-    if (!todaySpecial) {
+    if (todaySpecialList.length === 0) {
         showAlert('Please enter the Today Special.', 'danger');
         return;
     }
@@ -298,7 +322,7 @@ function updateRemainingAmount() {
         type: 'POST',
         data: {
             customerName: customerName,
-            todaySpecial: todaySpecial,
+            todaySpecial: JSON.stringify(todaySpecialList),
             totalAmount: totalAmount,
             paymentStatus: paymentStatus,
             paidAmount: paidAmount 
@@ -365,101 +389,38 @@ function cancel() {
     });
 }
 
-function editCustomer(id, customerName) {
+function editCustomer(id, customer_name, total_amount, payment_status, paid_amount, today_special) {
+  debugger
+  $('#saveButton').hide();
+  $('#updateButton').show();
   $('#specialModal').modal('show');
   $('#specialModalLabel').text('Edit Entry');
   $('#specialModal').data('customerId', id); 
 
-  $.ajax({
-    url: '/user/getdata',
-    type: 'GET',
-    success: function(response) {
-      if (response && response.data) {
-        var customerData = response.data.find(customer => customer.id === id);
-        debugger
+  $('#customerName').val(customer_name);
+  $('#totalAmount').val(total_amount);
+  $('#paymentStatus').val(payment_status);
 
-        if (customerData) {
-          $('#customerName').val(customerData.customer_name);
-          $('#totalAmount').val(customerData.total_amount);
-          $('#paymentStatus').val(customerData.payment_status);
+  if (payment_status === 'Partial') {
+    $('#partialAmount').val(paid_amount);
+    $('#partialPaymentContainer').show();
+  } else {
+    $('#partialAmount').val('');
+    $('#partialPaymentContainer').hide();
+    $('#remainingAmountLabel').hide();
+  }
 
-          if (customerData.payment_status === 'Partial') {
-            $('#partialAmount').val(customerData.paid_amount);
-            $('#partialPaymentContainer').show();
+  $('#partialAmount, #totalAmount').trigger('input');
 
-           
-          } else {
-            $('#partialAmount').val('');
-            $('#partialPaymentContainer').hide();
-            $('#remainingAmountLabel').hide();
-          }
-          $('#partialAmount, #totalAmount').trigger('input');
+  const specialString = today_special;
+  const snackItems = specialString.split(',').map(item => {
+    const match = item.trim().match(/^(.+?)\s*\((\d+)\)$/);
+    return match ? { name: match[1], qty: parseInt(match[2]) } : null;
+  }).filter(item => item);
 
-          const specialString = customerData.today_special;
-          const snackItems = specialString.split(',').map(item => {
-            const match = item.trim().match(/^(.+?)\s*\((\d+)\)$/);
-            return match ? { name: match[1], qty: parseInt(match[2]) } : null;
-          }).filter(item => item);
 
-          $.ajax({
-            url: '/user/getsnack',
-            method: 'GET',
-            success: function(snackResponse) {
-              const snacks = snackResponse.data;
-
-              choices.clearChoices();
-
-              const selectedSnackIds = [];
-              const idToQtyMap = {};
-
-              for (let i = 0; i < snacks.length; i++) {
-                const snack = snacks[i];
-
-                for (let j = 0; j < snackItems.length; j++) {
-                  if (snack.snacks_name.trim() === snackItems[j].name.trim()) {
-                    selectedSnackIds.push(snack.id);
-                    idToQtyMap[snack.id] = snackItems[j].qty;
-                    break;
-                  }
-                }
-              }
-
-              snacks.forEach(snack => {
-                choices.setChoices([{
-                  value: snack.id,
-                  label: `${snack.snacks_name} - $${snack.snack_price}`,
-                  selected: selectedSnackIds.includes(snack.id),
-                  disabled: false
-                }], 'value', 'label', false);
-              });
-
-              setTimeout(() => {
-                $('#snackSelect').trigger('change');
-
-                setTimeout(() => {
-                  for (let i = 0; i < selectedSnackIds.length; i++) {
-                    const id = selectedSnackIds[i];
-                    $(`input[name="quantity_${id}"]`).val(idToQtyMap[id]);
-                  }
-                }, 200);
-              }, 100);
-            }
-          });
-
-          $('#saveButton').hide();
-          $('#updateButton').show();
-        } else {
-          showAlert('Customer data not found!', 'danger');
-        }
-      } else {
-        showAlert('Failed to fetch customer data.', 'danger');
-      }
-    },
-    error: function(xhr, status, error) {
-      showAlert('An error occurred while fetching customer data.', 'danger');
-    }
-  });
 }
+
 function updateSpecial() {
     var customerName = $('#customerName').val();
     var totalAmount = $('#totalAmount').val();
@@ -470,25 +431,29 @@ function updateSpecial() {
 
     var todaySpecialList = [];
 
-    for (var i = 0; i < selectedSnacks.length; i++) {
-    var snack = selectedSnacks[i];
-    var snackId = snack.value;
-    var label = snack.label; 
-    var snackName = label.split(' - $')[0];
-    var qty = $(`input[name="quantity_${snackId}"]`).val() || 0;
+for (var i = 0; i < selectedSnacks.length; i++) {
+  var snack = selectedSnacks[i];
+  var snackId = snack.value;
+  var label = snack.label; 
+  var snackName = label.split(' - $')[0];
+  var price = parseFloat(label.split('$')[1]) || 0;
+  var qty = parseInt($(`input[name="quantity_${snackId}"]`).val()) || 0;
 
-    if (qty > 0) {
-      todaySpecialList.push(snackName + ' (' + qty + ')');
-    }
-    }
+  if (qty > 0) {
+    todaySpecialList.push({
+      snackName: snackName,
+      quantity: qty,
+      price: price
+    });
+  }
+}
 
-    var todaySpecial = todaySpecialList.join(', ');
 
     if (!customerName) {
         showAlert('Please enter the Customer Name.', 'danger');
         return;
     }
-    if (!todaySpecial) {
+    if (todaySpecialList.length==0) {
         showAlert('Please enter the Today Special.', 'danger');
         return;
     }
@@ -522,7 +487,7 @@ function updateSpecial() {
         data: {
             id: customerId, 
             customerName: customerName,
-            todaySpecial: todaySpecial,
+            todaySpecial: JSON.stringify(todaySpecialList),
             totalAmount: totalAmount,
             paymentStatus: paymentStatus,
             paidAmount: paidAmount 

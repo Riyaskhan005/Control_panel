@@ -1,3 +1,4 @@
+import json
 from flask import Flask, render_template,request,jsonify
 from Alimas_app.extensions import db
 from Alimas_app.managecustomers import bp
@@ -39,13 +40,15 @@ def save_data():
     payment_status = request.form.get('paymentStatus')
     paid_amount = request.form.get('paidAmount')
 
+    today_special_json = json.dumps(today_special)
+
     if not customer_name or not today_special or not total_amount or not payment_status:
         return jsonify({'error': 'All fields are required!'}), 400
 
     try:
         new_entry = CustomerEntry(
             customer_name=customer_name,
-            today_special=today_special,
+            today_special=today_special_json,
             total_amount=float(total_amount),
             paid_amount=paid_amount,  
             payment_status=payment_status

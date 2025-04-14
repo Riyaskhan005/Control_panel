@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 
 {% block body %}       
+<style>
+  .choices__button {
+  display: none !important; /* This will hide the button */
+}
+</style>
       <!--  Header End -->
       <div class="position-relative">
         <!-- Circle Button -->
@@ -28,7 +33,51 @@
             </div>
           </div>
         </div>
-        <!-- Modal -->
+           <!-- Modal -->
+      <div class="modal fade" id="specialModal" tabindex="-1" aria-labelledby="specialModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="specialModalLabel">View Entry</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="cancel()"></button>
+            </div>
+            <div class="modal-body">
+              <!-- Input Fields for the New Entry -->
+              <div class="mb-3">
+                <label for="customerName" class="form-label">Customer Name</label>
+                <input type="text" class="form-control" id="customerName" placeholder="Enter Customer Name">
+              </div>
+              <div class="mb-3">
+                <label for="snackSelect" class="form-label">Today Special</label>
+                <select id="snackSelect" multiple></select>
+              </div>
+              <div id="snackQuantities" class="mb-3"></div>
+              <div class="mb-3">
+                <label for="totalAmount" class="form-label">Total Amount</label>
+                <input type="number" class="form-control" id="totalAmount" placeholder="Enter Total Amount" disabled>
+              </div>
+              <div class="mb-3">
+                <label for="paymentStatus" class="form-label">Payment Status</label>
+                <select class="form-select" id="paymentStatus">
+                  <option value="Paid">Paid</option>
+                  <option value="Unpaid">Unpaid</option>
+                  <option value="Partial">Partially Paid</option>
+                </select>
+              </div>
+              <div class="mb-3" id="partialPaymentContainer" style="display: none;">
+                <label for="partialAmount" class="form-label">Paid Amount</label>
+                <input type="number" class="form-control" id="partialAmount" placeholder="Enter Paid Amount">
+                <small id="remainingAmountLabel" class="form-text text-muted" style="display: none;">
+                  Remaining Amount: ₹<span id="remainingValue">0</span>
+                </small>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="cancel()">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>  
       
 
 
@@ -42,15 +91,223 @@
 
 <script>
 
+$('#snackSelect').on('change', function () {
+  const selectedSnacks = choices.getValue(); 
+  $('#snackQuantities').empty(); 
+  let rowDiv = $('<div class="row mb-2"></div>'); 
+
+  selectedSnacks.forEach(function (snack, index) {
+    const snackId = snack.value;
+    const [name, price] = snack.label.split(' - $');
+
+    const col = $(`
+      <div class="col-md-4">
+        <label class="form-label">${name} ($${price})</label>
+        <input 
+          type="number" 
+          class="form-control snack-qty-input" 
+          name="quantity_${snackId}" 
+          placeholder="Qty" 
+          min="1"
+        />
+      </div>
+    `);
+
+    rowDiv.append(col);
+
+    if ((index + 1) % 3 === 0 || index === selectedSnacks.length - 1) {
+      $('#snackQuantities').append(rowDiv);
+      rowDiv = $('<div class="row mb-2"></div>'); 
+    }
+  });
+});
+
+const snackSelect = document.getElementById('snackSelect');
+
+const choices = new Choices(snackSelect, {
+  removeItemButton: true,
+  placeholderValue: 'Select snacks...',
+  searchEnabled: true,
+  disabled: true
+});
+
+function updateRemainingAmount() {
+  const total = parseFloat($('#totalAmount').val()) || 0;
+    const paid = parseFloat($('#partialAmount').val()) || 0;
+    const remaining = total - paid;
+
+    if ($('#paymentStatus').val() === 'Partial' && total > 0) {
+        if (paid >= 0) {
+            $('#remainingValue').text(remaining.toFixed(2));
+            $('#remainingAmountLabel').show();
+        } else {
+            $('#remainingAmountLabel').hide();
+        }
+    } else {
+        $('#remainingAmountLabel').hide();
+    }
+}
 
   $(document).ready(function() {
      loadData();
   });
 
   function loadData() {
-    $('#customerTable').DataTable()
-
+    $('#customerTable').DataTable({
+      "ajax": {
+        "url": "/customerdues/getduedata",
+        "type": "GET",
+        "dataSrc": "data" 
+      },
+      "columns": [
+      { 
+      "data": null,
+        "render": function(data, type, row, meta) {
+            return meta.row + 1;
+        },
+        },
+        { "data": "customer_name" },
+        {
+          "data": "today_special",
+          "render": function(data) {
+            try {
+              if (typeof data === 'string' && data.trim().length > 0) {
+                if (data.startsWith('"') && data.endsWith('"')) {
+                  data = data.slice(1, -1);
+                }
+                data = data.replace(/\\"/g, '"');
+                const specials = JSON.parse(data);
+                return specials.map(s => `${s.snackName} (${s.quantity})`).join(', ');
+              } else {
+                return 'No specials available';
+              }
+            } catch (e) {
+              console.error('Error parsing today_special:', e);
+              return 'Error parsing specials'; 
+            }
+          }
+        },
+        { "data": "total_amount" },
+        { "data": "paid_amount" },
+        {
+          "data": "payment_status",
+          "render": function(data) {
+            if (data === 'Paid') return '<span class="badge bg-success">Paid</span>';
+            if (data === 'Unpaid') return '<span class="badge bg-danger">Unpaid</span>';
+            if (data === 'Partial') return '<span class="badge bg-warning text-dark">Partial</span>';
+            return data;
+          }
+        },
+        {
+        "data": "id",
+        "render": function(data, type, row) {
+          let todaySpecial = JSON.parse(row.today_special);
+          let todaySpecialStr = JSON.stringify(todaySpecial).replace(/"/g, '&quot;')
+          return `
+            <button class="btn btn-outline-info btn-sm m-1" data-id="${data}" data-name="${row.customer_name}" onclick="viewCustomer(${data}, '${row.customer_name}', ${row.total_amount}, '${row.payment_status}','${row.paid_amount}','${todaySpecialStr}')"><i class="ti ti-eye"></i></button>
+            </button>
+            <button class="btn btn-outline-info btn-sm m-1" onclick="shareCustomer(${data})">
+              <i class="ti ti-share"></i>
+            </button>
+          `;
+        }
+      }
+    ],
+      "destroy": true, 
+      "initComplete": function() {
+                const searchInput = $('#customerTable_filter input');
+                searchInput.attr("placeholder", "Search here...");
+            }
+    });
   }
+
+  function viewCustomer(id, customer_name, total_amount, payment_status, paid_amount, today_special) {
+  $('#specialModal').modal('show');
+  $('#specialModalLabel').text('View Entry');
+  $('#specialModal').data('customerId', id);
+
+  $('#customerName').val(customer_name).prop('disabled', true);
+  $('#totalAmount').val(total_amount).prop('disabled', true);
+  $('#paymentStatus').val(payment_status).prop('disabled', true);
+
+  if (payment_status === 'Partial') {
+    $('#partialAmount').val(paid_amount).prop('disabled', true);
+    $('#partialPaymentContainer').show();
+    updateRemainingAmount();
+  } else {
+    $('#partialAmount').val('').prop('disabled', true);
+    $('#partialPaymentContainer').hide();
+    $('#remainingAmountLabel').hide();
+  }
+
+  $('#partialAmount, #totalAmount').trigger('input');
+
+  const specialString = today_special;
+  const snackItems = specialString.split(',').map(item => {
+    const match = item.trim().match(/^(.+?)\s*\((\d+)\)$/);
+    return match ? { name: match[1], qty: parseInt(match[2]) } : null;
+  }).filter(item => item);
+
+  let snackHTML = '';
+  snackItems.forEach(item => {
+    snackHTML += `
+      <div class="mb-2">
+        <label class="form-label">${item.name}</label>
+        <input type="number" class="form-control" value="${item.qty}" disabled>
+      </div>
+    `;
+  });
+
+  $('#snackContainer').html(snackHTML);
+
+  $('#saveButton').hide();
+  $('#updateButton').hide();
+        
+    
+}
+function cancel() {
+  $('#specialModal').modal('hide');
+  $('#specialModalLabel').text('Add Entry');
+  $('#customerName').val('');
+  $('#totalAmount').val('');
+  $('#paymentStatus').val('Paid');
+  $('#saveButton').show();
+  $('#updateButton').hide();
+
+
+  choices.removeActiveItems();
+  choices.setChoiceByValue([]);
+
+  $('#snackQuantities').empty();
+
+  $('#specialModal').removeData('customerId');
+
+  $('#totalAmount').val('');
+  $('#partialAmount').val('').closest('.mb-3').hide();
+  $('#remainingAmountLabel').hide();  
+}
+
+function cancel() {
+  $('#specialModal').modal('hide');
+  $('#specialModalLabel').text('Add Entry');
+  $('#customerName').val('');
+  $('#totalAmount').val('');
+  $('#paymentStatus').val('Paid');
+  $('#saveButton').show();
+  $('#updateButton').hide();
+
+
+  choices.removeActiveItems();
+  choices.setChoiceByValue([]);
+
+  $('#snackQuantities').empty();
+
+  $('#specialModal').removeData('customerId');
+
+  $('#totalAmount').val('');
+  $('#partialAmount').val('').closest('.mb-3').hide();
+  $('#remainingAmountLabel').hide();  
+}
 
 </script>
       
