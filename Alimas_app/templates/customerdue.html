@@ -130,7 +130,7 @@ const choices = new Choices(snackSelect, {
   searchEnabled: true,
   disabled: true
 });
-
+choices.disable();
 function updateRemainingAmount() {
   const total = parseFloat($('#totalAmount').val()) || 0;
     const paid = parseFloat($('#partialAmount').val()) || 0;
@@ -239,31 +239,79 @@ function updateRemainingAmount() {
     $('#partialPaymentContainer').hide();
     $('#remainingAmountLabel').hide();
   }
-
   $('#partialAmount, #totalAmount').trigger('input');
 
-  const specialString = today_special;
-  const snackItems = specialString.split(',').map(item => {
-    const match = item.trim().match(/^(.+?)\s*\((\d+)\)$/);
-    return match ? { name: match[1], qty: parseInt(match[2]) } : null;
-  }).filter(item => item);
+let selectedSnacks = [];
 
-  let snackHTML = '';
-  snackItems.forEach(item => {
-    snackHTML += `
-      <div class="mb-2">
-        <label class="form-label">${item.name}</label>
-        <input type="number" class="form-control" value="${item.qty}" disabled>
-      </div>
-    `;
-  });
+try {
+  if (typeof today_special === 'string' && today_special.trim().length > 0) {
+    if (today_special.startsWith('"') && today_special.endsWith('"')) {
+      today_special = today_special.slice(1, -1);
+    }
+    today_special = today_special.replace(/\\"/g, '"');
+    selectedSnacks = JSON.parse(today_special);
+  } else {
+    return 'No specials available';
+  }
+} catch (e) {
+  console.error('Error parsing today_special:', e);
+  return 'Error parsing specials'; 
+}
+const selectedSnackNames = selectedSnacks.map(snack => snack.snackName);
 
-  $('#snackContainer').html(snackHTML);
+choices.clearChoices();
+const formattedChoices = selectedSnacks.map(snack => ({
+value: snack.snackName,
+label: `${snack.snackName} - ₹${snack.price}`,
+selected: true,
+disabled: true
+}));
+choices.setChoices(formattedChoices, 'value', 'label', true);
+choices.disable();
 
-  $('#saveButton').hide();
-  $('#updateButton').hide();
-        
-    
+// fetchSnacks(selectedSnackNames);
+renderQuantityInputs(selectedSnacks);
+setTimeout(() => {
+selectedSnacks.forEach(snack => {
+  $(`input[name="quantity_${snack.snackName}"]`).val(snack.quantity);
+});
+}, 100);
+}
+
+function renderQuantityInputs(snacks) {
+const container = $('#snackQuantities');
+container.empty();
+
+let rowDiv = $('<div class="row mb-2"></div>'); 
+
+snacks.forEach(function (snack, index) {
+  const snackId = snack.snackName;
+  const name = snack.snackName;
+  const price = snack.price;
+  const savedQty = snack.quantity || '';
+
+  const col = $(`
+    <div class="col-md-4">
+      <label class="form-label">${name} (₹${price})</label>
+      <input 
+        type="number" 
+        class="form-control snack-qty-input" 
+        name="quantity_${snackId}" 
+        placeholder="Qty" 
+        min="1"
+        value="${savedQty}"
+        disabled
+      />
+    </div>
+  `);
+
+  rowDiv.append(col);
+
+  if ((index + 1) % 3 === 0 || index === snacks.length - 1) {
+    container.append(rowDiv);
+    rowDiv = $('<div class="row mb-2"></div>');
+  }
+});
 }
 function cancel() {
   $('#specialModal').modal('hide');
