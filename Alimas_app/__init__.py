@@ -15,8 +15,11 @@ def create_app(config_class=Config):
     JWTManager(app)
 
     # Register blueprints
+    from Alimas_app.Authentication import bp as Authentication_bp
+    app.register_blueprint(Authentication_bp, url_prefix='/')
+
     from Alimas_app.dashboard import bp as dashboard_bp
-    app.register_blueprint(dashboard_bp, url_prefix='/')
+    app.register_blueprint(dashboard_bp, url_prefix='/home')
 
     from Alimas_app.managecustomers import bp as managecustomers_bp
     app.register_blueprint(managecustomers_bp, url_prefix='/user')

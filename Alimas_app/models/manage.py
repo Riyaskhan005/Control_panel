@@ -29,3 +29,17 @@ class SnackEntry(db.Model):
 
     def __repr__(self):
         return f'<SnackEntry>'
+    
+class Users(db.Model):
+    __tablename__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    First_name = db.Column(db.Text(255), nullable=False)
+    Last_name = db.Column(db.Text(255), nullable=False)
+    Email = db.Column(db.Text(255), nullable=False)
+    Password = db.Column(db.Text(255), nullable=False)
+    # created_on = db.Column(DateTime, nullable=False, default=func.now())
+    status = db.Column(db.Text(20), nullable=False, default="Active")
+
+    def __repr__(self):
+        return f'<Users>'
