@@ -4,8 +4,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MaterailM Free Bootstrap Admin Template by WrapPixel</title>
-  <link rel="shortcut icon" type="image/png" href="../static/images/logos/favicon.png" />
+  <title>{% block title %}Alimas{% endblock %}</title>
+  <link rel="shortcut icon" type="image/png" href="../static/images/logos/logo.png" />
   <link rel="stylesheet" href="../static/css/styles.min.css" />
 
   <!-- Theme style -->
@@ -23,8 +23,10 @@
       <!-- Sidebar scroll-->
       <div>
         <div class="brand-logo d-flex align-items-center justify-content-between">
-          <a href="./index.html" class="text-nowrap logo-img">
-            <img src="../static/images/logos/logo.svg" alt="" />
+           <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="../static/images/logos/logo.png" alt="Logo" style="width: 60px; height: 60px;">
+            <strong style="font-size: 18px; color: black;">Aalimas</strong>
+          </div>
           </a>
           <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
             <i class="ti ti-x fs-8"></i>
