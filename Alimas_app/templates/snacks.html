@@ -244,7 +244,7 @@ function updateSpecialSnack() {
         showAlert('Please enter the Snack Price.', 'danger');
         return;
     }
-
+    $('#loaderOverlay').show();
     $.ajax({
         url: '/todayspecial/updatesnack',
         type: 'PUT',
@@ -258,14 +258,17 @@ function updateSpecialSnack() {
             showAlert('Snack updated successfully!', 'success');
             loadSnacks();
             $('#specialModal').modal('hide');
+            $('#loaderOverlay').hide();
         },
         error: function(xhr, status, error) {
             console.log("Error updating snack:", xhr.responseText);
             showAlert('An error occurred while updating the snack.', 'danger');
+            $('#loaderOverlay').hide();
         }
     });
 }
     function deleteSnack(id) {
+    $('#loaderOverlay').show();
     Swal.fire({
         title: 'Are you sure?',
         text: 'Do you really want to delete this?',
@@ -284,9 +287,11 @@ function updateSpecialSnack() {
                 success: function(response) {
                   showAlert('Snack deleted successfully!', 'success');
                   loadSnacks(); 
+                  $('#loaderOverlay').hide();
                 },
                 error: function(xhr, status, error) {
                   showAlert('An error occurred while deleting the Snack.', 'danger');
+                  $('#loaderOverlay').hide();
                 }
             });
         }

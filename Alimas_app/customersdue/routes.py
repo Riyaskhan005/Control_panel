@@ -3,6 +3,7 @@ from Alimas_app.extensions import db
 from Alimas_app.customersdue import bp
 from Alimas_app.models.manage import CustomerEntry
 from Alimas_app.utils.logwritter import LogWriter 
+from Alimas_app.utils.login_requried import login_required
 from fpdf import FPDF
 import json,os
 import io
@@ -13,6 +14,7 @@ buffer = io.BytesIO()
 
 
 @bp.route('/')
+@login_required
 def index():
     return render_template("customerdue.html")
 

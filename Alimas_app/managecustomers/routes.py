@@ -4,10 +4,12 @@ from Alimas_app.extensions import db
 from Alimas_app.managecustomers import bp
 from Alimas_app.models.manage import CustomerEntry,SnackEntry
 from Alimas_app.utils.logwritter import LogWriter 
+from Alimas_app.utils.login_requried import login_required
 logger = LogWriter()
 
 
 @bp.route('/')
+@login_required
 def index():
     return render_template("manage.html")
 

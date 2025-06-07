@@ -18361,3 +18361,17 @@ ul {
   width: 100%;
   line-height: 20px;
 }
+
+#loaderOverlay {
+      display: none; /* Hidden by default */
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+      color: white;
+      font-size: 2rem;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding-top: 20vh;
+      user-select: none;
+    }

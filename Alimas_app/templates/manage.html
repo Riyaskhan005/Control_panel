@@ -220,6 +220,7 @@ function updateRemainingAmount() {
   });
 
   function loadData() {
+    $('#loaderOverlay').show();
     $('#customerTable').DataTable({
       "ajax": {
         "url": "/user/getdata",
@@ -283,6 +284,7 @@ function updateRemainingAmount() {
                 searchInput.attr("placeholder", "Search here...");
             }
     });
+    $('#loaderOverlay').hide();
   }
 
   function saveSpecial() {
@@ -340,6 +342,7 @@ for (var i = 0; i < selectedSnacks.length; i++) {
             return;
         }
     }
+    $('#loaderOverlay').show();
 
     $.ajax({
         url: '/user/savedata',
@@ -355,10 +358,12 @@ for (var i = 0; i < selectedSnacks.length; i++) {
             showAlert('Special saved successfully!', 'success');
 
             cancel() 
-            $('#customerTable').DataTable().ajax.reload();
+            loadData()
+            $('#loaderOverlay').hide();
         },
         error: function(xhr, status, error) {
             showAlert('An error occurred while saving the special.', 'danger');
+            $('#loaderOverlay').hide();
         }
     });
 }
@@ -386,6 +391,7 @@ function cancel() {
 }
 
     function deleteCustomer(id) {
+      $('#loaderOverlay').show();
     Swal.fire({
         title: 'Are you sure?',
         text: 'Do you really want to delete this?',
@@ -404,9 +410,11 @@ function cancel() {
                 success: function(response) {
                   showAlert('Customer deleted successfully!', 'success');
                     $('#customerTable').DataTable().ajax.reload(); 
+                    $('#loaderOverlay').hide();
                 },
                 error: function(xhr, status, error) {
                   showAlert('An error occurred while deleting the customer.', 'danger');
+                  $('#loaderOverlay').hide();
                 }
             });
         }
@@ -414,7 +422,6 @@ function cancel() {
 }
 
 function editCustomer(id, customer_name, total_amount, payment_status, paid_amount, today_special) {
-  debugger
   $('#saveButton').hide();
   $('#updateButton').show();
   $('#specialModal').modal('show');
@@ -552,7 +559,6 @@ for (var i = 0; i < selectedSnacks.length; i++) {
     }
 
     var paidAmount = 0;
-    debugger
     if (paymentStatus === "Paid") {
         paidAmount = totalAmount;
         $('#partialAmountWrapper').hide();
@@ -565,6 +571,7 @@ for (var i = 0; i < selectedSnacks.length; i++) {
             return;
         }
     }
+    $('#loaderOverlay').show();
 
     $.ajax({
         url: '/user/updatecustomer',  
@@ -581,15 +588,18 @@ for (var i = 0; i < selectedSnacks.length; i++) {
             showAlert('Customer updated successfully!', 'success');
 
             cancel() 
-            $('#customerTable').DataTable().ajax.reload();
+            loadData()
+            $('#loaderOverlay').hide();
         },
         error: function(xhr, status, error) {
             showAlert('An error occurred while updating the customer.', 'danger');
+            $('#loaderOverlay').hide();
         }
     });
 }
 
 function fetchSnacks(selectedSnackNames = []) {
+  $('#loaderOverlay').show();
   $.ajax({
     url: '/user/getsnack',
     method: 'GET',
@@ -607,9 +617,11 @@ function fetchSnacks(selectedSnackNames = []) {
           disabled: false
         }], 'value', 'label', false);
       });
+      $('#loaderOverlay').hide();
     },
     error: function(xhr, status, error) {
       console.error('Error fetching snacks:', error);
+      $('#loaderOverlay').hide();
     }
   });
 }

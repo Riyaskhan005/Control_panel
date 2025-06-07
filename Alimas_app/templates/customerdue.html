@@ -170,6 +170,7 @@ function updateRemainingAmount() {
   });
 
   function loadData() {
+    $('#loaderOverlay').show();
     $('#customerTable').DataTable({
       "ajax": {
         "url": "/customerdues/getduedata",
@@ -236,6 +237,7 @@ function updateRemainingAmount() {
                 searchInput.attr("placeholder", "Search here...");
             }
     });
+    $('#loaderOverlay').hide();
   }
 
   function viewCustomer(id, customer_name, total_amount, payment_status, paid_amount, today_special) {
@@ -379,6 +381,7 @@ function shareCustomer(id) {
 }
 
 function shareToPlatform(platform) {
+  $('#loaderOverlay').show();
  
   if (!selectedCustomerId) return;
 
@@ -418,10 +421,12 @@ function shareToPlatform(platform) {
       document.body.removeChild(link);
 
       $('#shareModal').modal('hide');
+      $('#loaderOverlay').hide();
     },
     error: function(xhr, status, error) {
       console.error("Error generating invoice:", error);
       alert("Failed to generate invoice");
+      $('#loaderOverlay').show();
     }
   });
 }

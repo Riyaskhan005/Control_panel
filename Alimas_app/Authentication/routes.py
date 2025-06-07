@@ -1,4 +1,4 @@
-from flask import Flask, render_template,request,jsonify,send_file,current_app,session
+from flask import Flask, render_template,request,jsonify,send_file,current_app,session,redirect
 from Alimas_app.extensions import db
 from Alimas_app.Authentication import bp
 from Alimas_app.models.manage import Users
@@ -45,3 +45,16 @@ def login():
 
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+
+
+@bp.route('/logout', methods=['GET', 'POST'])
+def logout():
+    session['user_id'] = ""
+    session['user_name'] = ""
+    session['email'] = ""
+    session.pop('user_id')
+    session.pop('user_name')
+    session.pop('email')
+    return redirect("/")

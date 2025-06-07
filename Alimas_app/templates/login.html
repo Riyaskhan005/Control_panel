@@ -27,26 +27,36 @@
                 
                 <div class="d-flex justify-content-between align-items-center mb-3">
                   <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="flexCheckChecked" checked>
-                    <label class="form-check-label" for="flexCheckChecked">
-                      Remember this Device
+                    <input class="form-check-input" type="checkbox" id="rememberMe">
+                    <label class="form-check-label" for="rememberMe">
+                      Remember me
                     </label>
                   </div>
-                  <a class="text-primary fw-bold" href="./index.html">Forgot Password?</a>
+                  <!-- <a class="text-primary fw-bold" href="./index.html">Forgot Password?</a> -->
                 </div>
                 
                 <button type="button" class="btn btn-primary w-100 py-2 fs-5 mb-3 rounded-2" onclick="Login()">Sign In</button>
                 
-                <div class="text-center">
+                <!-- <div class="text-center">
                   <p class="mb-0">New to Alimas? 
                     <a class="text-primary fw-bold" href="./authentication-register.html">Create an account</a>
                   </p>
-                </div>
+                </div> -->
               </form>
             </div>
           </div>
           </div>  
   <script>
+    $(document).ready(function () {
+      const email = getCookie("email");
+      const password = getCookie("password");
+
+      if (email && password) {
+          $('#Email').val(email);
+          $('#Password').val(password);
+          $('#rememberMe').prop('checked', true);
+      }
+  });
   $('#loginForm input').on('keypress', function (e) {
         if (e.which === 13) {
             e.preventDefault();
@@ -55,9 +65,10 @@
     });
     
   function Login(){
-    debugger
+    $('#loaderOverlay').show();
         var email = $('#Email').val();
         var password = $('#Password').val();
+        var remember = $('#rememberMe').is(':checked');
 
         if (!email) {
             showAlert("Please enter email.", "danger");
@@ -68,21 +79,27 @@
             return;
         }
 
+        if (remember) {
+        setCookie("email", email, 30);
+        setCookie("password", password, 30);
+        } else {
+            setCookie("email", "", -1);      
+            setCookie("password", "", -1);
+        }
+
         $.ajax({
             url: '/login',
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({ email: email, password: password }),
             success: function (response) {
-              debugger
                 if (response.status === 'success') {
                     showAlert("Welcome " + response.user.first_name + "!", "success");
-                    setTimeout(() => {
                         window.location.href = "/home";
-                    }, 1500);
                 } else {
                     showAlert(response.message, "danger");
                 }
+                $('#loaderOverlay').hide();
             },
             error: function (xhr) {
                 let msg = "Something went wrong. Please try again.";
@@ -90,10 +107,31 @@
                     msg = xhr.responseJSON.message;
                 }
                 showAlert(msg, "danger");
+                $('#loaderOverlay').hide();
             }
         });
     }
 
+
+
+function setCookie(name, value, days = 30) {
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    const expires = "; expires=" + date.toUTCString();
+    document.cookie = `${name}=${encodeURIComponent(value)}${expires}; path=/`;
+}
+
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const cookies = document.cookie.split(';');
+    for (let c of cookies) {
+        c = c.trim();
+        if (c.startsWith(nameEQ)) {
+            return decodeURIComponent(c.substring(nameEQ.length));
+        }
+    }
+    return null;
+}
 
   </script>
   {% endblock %}
