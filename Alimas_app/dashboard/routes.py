@@ -10,5 +10,5 @@ logger = LogWriter()
 @bp.route('/')
 @login_required
 def index():
-    return render_template("base.html")
+    return render_template("dashboard.html")
 
