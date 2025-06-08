@@ -13,7 +13,7 @@
     </button>
     <div class="card">
         <div class="card-body">
-            <h5 class="mt-4 mb-2">Recently Added Snacks</h5>
+            <h5 class="mt-4 mb-2">Manage Snacks</h5>
             <div class="row" id="snackContainer">
                 <!-- New info-boxes will be added here -->
             </div>
@@ -88,7 +88,7 @@
                   }
 
                     let tagText = snack.today_special === "true" ? "Active" : "InActive";
-                    let tagClass = snack.today_special === "true" ? "badge bg-success" : "badge bg-warning text-dark";
+                    let tagClass = snack.today_special === "true" ? "badge rounded-pill fs-2 fw-medium bg-success-subtle text-success" : "badge rounded-pill fs-2 fw-medium bg-danger-subtle text-danger";
                     let isChecked = snack.today_special === "true" ? "checked" : "";
                     let checkboxId = `specialCheck_${snack.id}`;
                     let price = parseFloat(snack.snack_price).toFixed(2);

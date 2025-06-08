@@ -20,7 +20,7 @@
                     <tr>
                       <th>#</th>
                       <th>Customer Name</th>
-                      <th>Today Special</th>
+                      <th>Item(s) Ordered</th>
                       <th>Total Amount</th>
                       <th>Paid Amount</th>
                       <th>Payment Status</th>
@@ -47,7 +47,7 @@
               <input type="text" class="form-control" id="customerName" placeholder="Enter Customer Name">
             </div>
             <div class="mb-3">
-              <label for="snackSelect" class="form-label">Today Special</label>
+              <label for="snackSelect" class="form-label">Item(s) Ordered</label>
               <select id="snackSelect" multiple></select>
             </div>
             <div id="snackQuantities" class="mb-3"></div>
@@ -260,9 +260,9 @@ function updateRemainingAmount() {
         {
           "data": "payment_status",
           "render": function(data) {
-            if (data === 'Paid') return '<span class="badge bg-success">Paid</span>';
-            if (data === 'Unpaid') return '<span class="badge bg-danger">Unpaid</span>';
-            if (data === 'Partial') return '<span class="badge bg-warning text-dark">Partial</span>';
+            if (data === 'Paid') return '<span class="badge rounded-pill fs-2 fw-medium bg-success-subtle text-success">Paid</span>';
+            if (data === 'Unpaid') return '<span class="badge rounded-pill fs-2 fw-medium bg-danger-subtle text-danger">Unpaid</span>';
+            if (data === 'Partial') return '<span class="badge rounded-pill fs-2 fw-medium bg-warning-subtle text-warning">Partial</span>';
             return data;
           }
         },
@@ -319,7 +319,7 @@ for (var i = 0; i < selectedSnacks.length; i++) {
         return;
     }
     if (todaySpecialList.length === 0) {
-        showAlert('Please enter the Today Special.', 'danger');
+        showAlert('Please select the Item(s).', 'danger');
         return;
     }
     if (!totalAmount) {
@@ -546,7 +546,7 @@ for (var i = 0; i < selectedSnacks.length; i++) {
         return;
     }
     if (todaySpecialList.length==0) {
-        showAlert('Please enter the Today Special.', 'danger');
+        showAlert('Please select the Item(s).', 'danger');
         return;
     }
     if (!totalAmount) {

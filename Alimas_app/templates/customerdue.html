@@ -210,9 +210,9 @@ function updateRemainingAmount() {
         {
           "data": "payment_status",
           "render": function(data) {
-            if (data === 'Paid') return '<span class="badge bg-success">Paid</span>';
-            if (data === 'Unpaid') return '<span class="badge bg-danger">Unpaid</span>';
-            if (data === 'Partial') return '<span class="badge bg-warning text-dark">Partial</span>';
+            if (data === 'Paid') return '<span class="badge rounded-pill fs-2 fw-medium bg-success-subtle text-success">Paid</span>';
+            if (data === 'Unpaid') return '<span class="badge rounded-pill fs-2 fw-medium bg-danger-subtle text-danger">Unpaid</span>';
+            if (data === 'Partial') return '<span class="badge rounded-pill fs-2 fw-medium bg-warning-subtle text-warning">Partial</span>';
             return data;
           }
         },

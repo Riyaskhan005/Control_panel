@@ -40,27 +40,33 @@
               <span class="hide-menu">Home</span>
             </li>
             <li class="sidebar-item">
-              <a class="sidebar-link" href="/home" aria-expanded="false">
+              <a class="sidebar-link {% if request.path.startswith('/home') %}active{% endif %}" href="/home" aria-expanded="false">
                 <iconify-icon icon="solar:widget-add-line-duotone"></iconify-icon>
                 <span class="hide-menu">Dashboard</span>
               </a>
             </li>
             <li class="sidebar-item">
-              <a class="sidebar-link" href="/user" aria-expanded="false">
+              <a class="sidebar-link {% if request.path.startswith('/user') %}active{% endif %}" href="/user" aria-expanded="false">
                 <i class="ti ti-user"></i>
-                <span class="hide-menu">User</span>
+                <span class="hide-menu">Manage customers</span>
               </a>
             </li>
             <li class="sidebar-item">
-              <a class="sidebar-link" href="/todayspecial" aria-expanded="false">
+              <a class="sidebar-link {% if request.path.startswith('/todayspecial') %}active{% endif %}" href="/todayspecial" aria-expanded="false">
                 <i class="ti ti-meat"></i>
-                <span class="hide-menu">Today Special</span>
+                <span class="hide-menu">Manage snaks</span>
               </a>
             </li>
             <li class="sidebar-item">
-              <a class="sidebar-link" href="/customerdues" aria-expanded="false">
-                <i class="ti ti-currency-dollar"></i>
+              <a class="sidebar-link {% if request.path.startswith('/customerdues') %}active{% endif %}" href="/customerdues" aria-expanded="false">
+                <i class="ti ti-clock"></i>
                 <span class="hide-menu">Customer Dues</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="/logout" aria-expanded="false">
+                <i class="ti ti-logout"></i>
+                <span class="hide-menu">Log out</span>
               </a>
             </li>
           </ul>
