@@ -41,7 +41,7 @@
                       </div>
                       <div class="row align-items-end justify-content-between">
                         <div class="col-5">
-                          <h2 class="mb-6 fs-8">4,562</h2>
+                          <h2 class="mb-6 fs-8" id="customer-count"></h2></h2>
                         </div>
                         <div class="col-5">
                           <div id="total-followers" class="rounded-bars"></div>
@@ -66,7 +66,7 @@
                       </div>
                       <div class="row align-items-center justify-content-between pt-4">
                         <div class="col-5">
-                          <h2 class="mb-6 fs-8 text-nowrap">$6,280</h2>
+                          <h2 class="mb-6 fs-8 text-nowrap" id="credited-amount"></h2>
                         </div>
                         <div class="col-5">
                           <div id="total-income"></div>
@@ -79,105 +79,115 @@
             </div>
           </div>
           <div class="row">
-            <div class="col-lg-4">
-              <div class="card overflow-hidden hover-img">
-                <div class="position-relative">
-                  <a href="javascript:void(0)">
-                    <img src="../static/images/blog/blog-img1.jpg" class="card-img-top" alt="materialM-img">
-                  </a>
-                  <span
-                    class="badge text-bg-light text-dark fs-2 lh-sm mb-9 me-9 py-1 px-2 fw-semibold position-absolute bottom-0 end-0">2
-                    min Read</span>
-                  <img src="../static/images/profile/user-3.jpg" alt="materialM-img"
-                    class="img-fluid rounded-circle position-absolute bottom-0 start-0 mb-n9 ms-9" width="40"
-                    height="40" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Georgeanna Ramero">
-                </div>
-                <div class="card-body p-4">
-                  <span class="badge text-bg-light fs-2 py-1 px-2 lh-sm  mt-3">Social</span>
-                  <a class="d-block my-4 fs-5 text-dark fw-semibold link-primary" href="">As yen tumbles, gadget-loving
-                    Japan goes
-                    for secondhand iPhones</a>
-                  <div class="d-flex align-items-center gap-4">
-                    <div class="d-flex align-items-center gap-2">
-                      <i class="ti ti-eye text-dark fs-5"></i>9,125
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                      <i class="ti ti-message-2 text-dark fs-5"></i>3
-                    </div>
-                    <div class="d-flex align-items-center fs-2 ms-auto">
-                      <i class="ti ti-point text-dark"></i>Mon, Dec 19
+              <div class="position-relative">
+                <h3 class="mt-4 mb-md-3">Today Special</h3>
+                <div class="card bg-primary-subtle">
+                  <div class="card-body">
+                    <div class="row" id="snackContainer">
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="col-lg-4">
-              <div class="card overflow-hidden hover-img">
-                <div class="position-relative">
-                  <a href="javascript:void(0)">
-                    <img src="../static/images/blog/blog-img2.jpg" class="card-img-top" alt="materialM-img">
-                  </a>
-                  <span
-                    class="badge text-bg-light text-dark fs-2 lh-sm mb-9 me-9 py-1 px-2 fw-semibold position-absolute bottom-0 end-0">2
-                    min Read</span>
-                  <img src="../static/images/profile/user-2.jpg" alt="materialM-img"
-                    class="img-fluid rounded-circle position-absolute bottom-0 start-0 mb-n9 ms-9" width="40"
-                    height="40" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Georgeanna Ramero">
-                </div>
-                <div class="card-body p-4">
-                  <span class="badge text-bg-light fs-2 py-1 px-2 lh-sm  mt-3">Gadget</span>
-                  <a class="d-block my-4 fs-5 text-dark fw-semibold link-primary" href="">Intel loses bid to revive
-                    antitrust case
-                    against patent foe Fortress</a>
-                  <div class="d-flex align-items-center gap-4">
-                    <div class="d-flex align-items-center gap-2">
-                      <i class="ti ti-eye text-dark fs-5"></i>4,150
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                      <i class="ti ti-message-2 text-dark fs-5"></i>38
-                    </div>
-                    <div class="d-flex align-items-center fs-2 ms-auto">
-                      <i class="ti ti-point text-dark"></i>Sun, Dec 18
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-lg-4">
-              <div class="card overflow-hidden hover-img">
-                <div class="position-relative">
-                  <a href="javascript:void(0)">
-                    <img src="../static/images/blog/blog-img3.jpg" class="card-img-top" alt="materialM-img">
-                  </a>
-                  <span
-                    class="badge text-bg-light text-dark fs-2 lh-sm mb-9 me-9 py-1 px-2 fw-semibold position-absolute bottom-0 end-0">2
-                    min Read</span>
-                  <img src="../static/images/profile/user-3.jpg" alt="materialM-img"
-                    class="img-fluid rounded-circle position-absolute bottom-0 start-0 mb-n9 ms-9" width="40"
-                    height="40" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Georgeanna Ramero">
-                </div>
-                <div class="card-body p-4">
-                  <span class="badge text-bg-light fs-2 py-1 px-2 lh-sm  mt-3">Health</span>
-                  <a class="d-block my-4 fs-5 text-dark fw-semibold link-primary" href="">COVID outbreak deepens as more
-                    lockdowns
-                    loom in China</a>
-                  <div class="d-flex align-items-center gap-4">
-                    <div class="d-flex align-items-center gap-2">
-                      <i class="ti ti-eye text-dark fs-5"></i>9,480
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                      <i class="ti ti-message-2 text-dark fs-5"></i>12
-                    </div>
-                    <div class="d-flex align-items-center fs-2 ms-auto">
-                      <i class="ti ti-point text-dark"></i>Sat, Dec 17
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          </div>
+            
           
               <script src="../static/libs/simplebar/dist/simplebar.js"></script>
               <script src="../static/js/dashboard.js"></script>
               <!-- solar icons -->
               <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+              <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+              <script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
+            <link rel="stylesheet" href="https://cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
+
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+            <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <script>
+      $(document).ready(function () {
+        dashboardload();
+        availabelsnack();
+      });
+
+     function dashboardload() {
+    $.ajax({
+      url: "/home/load_dashboard",
+      type: "GET",
+      success: function (data) {
+        debugger
+        $("#customer-count").text(data.count);
+        $("#credited-amount").text(`₹${data.credited_amount}`);
+      },
+      error: function (xhr, status, error) {
+        console.error("Error fetching customer count:", error);
+      }
+    });
+  }
+  function availabelsnack() {
+    $.ajax({
+        url: '/home/availabel_snack',
+        type: 'GET',
+        success: function (response) {
+            if (response.data) {
+                $('#snackContainer').empty();
+              
+                response.data.forEach(function (snack, index) {
+                  let snackName = snack.snacks_name.toLowerCase();
+                  let icon;
+
+                 
+                  if (snackName.includes("chai")) {
+                      icon =  `<i class="fas fa-mug-hot"></i>`; 
+                  } else if (snackName.includes("burger")) {
+                      icon = `<i class="fas fa-hamburger"></i>`;
+                  } else if (snackName.includes("shawarma")||snackName.includes("roll")) {
+                      icon = `<img src="../static/images/roll.svg" alt="Shawarma Icon" width="50" height="50">`; 
+                  } else if (snackName.includes("toast")) {
+                      icon = `<i class="fas fa-bread-slice"></i>`;
+                  } else if (snackName.includes("fried rice") || snackName.includes("noodles")) {
+                  icon = `<i class="fas fa-bowl-food"></i>`; 
+                  } else {
+                      icon =`<i class="fas fa-pizza-slice"></i>`;
+                  }
+
+                    let tagText = snack.today_special === "true" ? "Active" : "InActive";
+                    let tagClass = snack.today_special === "true" ? "badge rounded-pill fs-2 fw-medium bg-success-subtle text-success" : "badge rounded-pill fs-2 fw-medium bg-danger-subtle text-danger";
+                    let isChecked = snack.today_special === "true" ? "checked" : "";
+                    let checkboxId = `specialCheck_${snack.id}`;
+                    let price = parseFloat(snack.snack_price).toFixed(2);
+
+                    var infoBox = `
+                        <div class="col-md-3 col-sm-6 col-12 mb-3">
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-body d-flex flex-column">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="me-3" style="font-size: 2rem;">
+                                            ${icon}
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1 d-flex justify-content-between align-items-center">
+                                                <span>${snack.snacks_name}</span>
+                                                <span class="${tagClass}" style="font-size: 0.75rem;">${tagText}</span>
+                                            </h6>
+                                            <small class="text-muted">₹${price}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                        
+
+                    $('#snackContainer').append(infoBox);
+                });
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error fetching snacks:", error);
+            showAlert('Failed to load snacks.', 'danger');
+        }
+    });
+  }
+  </script>
 {%endblock%}

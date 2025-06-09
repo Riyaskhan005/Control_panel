@@ -391,7 +391,6 @@ function cancel() {
 }
 
     function deleteCustomer(id) {
-      $('#loaderOverlay').show();
     Swal.fire({
         title: 'Are you sure?',
         text: 'Do you really want to delete this?',
@@ -402,6 +401,7 @@ function cancel() {
         reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {
+            $('#loaderOverlay').show();
             $.ajax({
                 url: '/user/deletecustomer',
                 type: 'DELETE',

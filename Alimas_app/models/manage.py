@@ -11,7 +11,7 @@ class CustomerEntry(db.Model):
     total_amount = db.Column(db.Float, nullable=False)
     paid_amount = db.Column(db.Float, nullable=False)
     payment_status = db.Column(db.Text(50), nullable=False)
-    # created_on = db.Column(DateTime, nullable=False, default=func.now())
+    created_on = db.Column(db.Text(255))
     status = db.Column(db.String(20), nullable=False, default="Active")
 
 
@@ -24,7 +24,7 @@ class SnackEntry(db.Model):
     snacks_name = db.Column(db.Text(255), nullable=False)
     today_special = db.Column(db.Text(255), nullable=False)
     snack_price = db.Column(db.Float, nullable=False)
-    # created_on = db.Column(DateTime, nullable=False, default=func.now())
+    # created_on = db.Column(db.Text(255)
     status = db.Column(db.Text(20), nullable=False, default="Active")
 
     def __repr__(self):

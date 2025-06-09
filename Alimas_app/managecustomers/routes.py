@@ -3,6 +3,7 @@ from flask import Flask, render_template,request,jsonify
 from Alimas_app.extensions import db
 from Alimas_app.managecustomers import bp
 from Alimas_app.models.manage import CustomerEntry,SnackEntry
+from Alimas_app.utils.common import get_current_utc
 from Alimas_app.utils.logwritter import LogWriter 
 from Alimas_app.utils.login_requried import login_required
 logger = LogWriter()
@@ -42,6 +43,8 @@ def save_data():
     payment_status = request.form.get('paymentStatus')
     paid_amount = request.form.get('paidAmount')
 
+    createdOn = get_current_utc()
+
     today_special_json = json.dumps(today_special)
 
     if not customer_name or not today_special or not total_amount or not payment_status:
@@ -53,7 +56,8 @@ def save_data():
             today_special=today_special_json,
             total_amount=float(total_amount),
             paid_amount=paid_amount,  
-            payment_status=payment_status
+            payment_status=payment_status,
+            created_on = createdOn 
         )
 
       
