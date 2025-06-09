@@ -11,10 +11,7 @@
                     </div>
                     <div>
                       <select class="form-select">
-                        <option value="1">March 2024</option>
-                        <option value="2">April 2024</option>
-                        <option value="3">May 2024</option>
-                        <option value="4">June 2024</option>
+                        
                       </select>
                     </div>
                   </div>
@@ -103,11 +100,13 @@
             <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
             <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+            <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
   <script>
       $(document).ready(function () {
         dashboardload();
         availabelsnack();
+        loadSalesProfitChart(); 
       });
 
      function dashboardload() {
@@ -189,5 +188,47 @@
         }
     });
   }
+
+  function loadSalesProfitChart() {
+  $.ajax({
+    url: "/home/get_daily_profit",
+    type: "GET",
+    success: function (data) {
+      const labels = data.map(item => item.date);
+      const profits = data.map(item => item.profit);
+
+      var options = {
+        chart: {
+          type: 'line',
+          height: 300,
+        },
+        series: [{
+          name: 'Profit ₹',
+          data: profits
+        }],
+        xaxis: {
+          categories: labels
+        },
+        stroke: {
+          curve: 'smooth'
+        },
+        title: {
+          text: "Daily Sales Profit",
+          align: "left"
+        },
+        colors: ["#00b894"],
+        dataLabels: {
+          enabled: true
+        }
+      };
+
+      var chart = new ApexCharts(document.querySelector("#sales-profit"), options);
+      chart.render();
+    },
+    error: function (err) {
+      console.error("Error loading profit chart", err);
+    }
+  });
+}
   </script>
 {%endblock%}

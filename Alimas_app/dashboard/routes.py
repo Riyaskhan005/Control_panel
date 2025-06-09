@@ -51,3 +51,27 @@ def availabel_snack():
     except Exception as e:
         logger.log_exception("app", "getsnacks", e)
         return jsonify({'error': str(e)}), 500 
+
+
+@bp.route('/get_daily_profit', methods=['GET'])
+def get_daily_profit():
+    try:
+        daily_data = (
+            db.session.query(
+                CustomerEntry.created_on,
+                db.func.sum(CustomerEntry.paid_amount - CustomerEntry.total_amount).label("profit")
+            )
+            .filter(CustomerEntry.status == "Active")
+            .group_by(CustomerEntry.created_on)
+            .order_by(CustomerEntry.created_on.asc())
+            .all()
+        )
+
+        data = [
+            {"date": row.created_on, "profit": float(row.profit)} for row in daily_data
+        ]
+
+        return jsonify(data), 200
+    except Exception as e:
+        logger.log_exception("app", "get_daily_profit", e)
+        return jsonify({'error': 'Internal server error'}), 500
