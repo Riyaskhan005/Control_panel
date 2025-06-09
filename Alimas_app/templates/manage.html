@@ -24,6 +24,7 @@
                       <th>Total Amount</th>
                       <th>Paid Amount</th>
                       <th>Payment Status</th>
+                      <th>Created_On</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
@@ -264,6 +265,16 @@ function updateRemainingAmount() {
             if (data === 'Unpaid') return '<span class="badge rounded-pill fs-2 fw-medium bg-danger-subtle text-danger">Unpaid</span>';
             if (data === 'Partial') return '<span class="badge rounded-pill fs-2 fw-medium bg-warning-subtle text-warning">Partial</span>';
             return data;
+          }
+        },
+                {
+          data: "created_on",
+          render: function(data, type, row) {
+            const localDate = new Date(data);
+            const day = String(localDate.getDate()).padStart(2, '0');
+            const month = String(localDate.getMonth() + 1).padStart(2, '0');
+            const year = localDate.getFullYear();
+            return `${day}-${month}-${year}`;
           }
         },
         {

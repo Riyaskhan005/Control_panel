@@ -27,7 +27,8 @@ def get_data():
                 'today_special': entry.today_special,
                 'total_amount': entry.total_amount,
                 'payment_status': entry.payment_status,
-                'paid_amount': entry.paid_amount
+                'paid_amount': entry.paid_amount,
+                'created_on':entry.created_on
             })
         
         return jsonify({'data': data}), 200
