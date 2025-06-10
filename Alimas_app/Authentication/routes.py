@@ -29,6 +29,7 @@ def login():
             session['user_id'] = user.id
             session['user_name'] = f"{user.First_name} {user.Last_name}"
             session['email'] = user.Email
+            session['profilepath'] = user.ProfilePath
             
             return jsonify({
                 'status': 'success',
@@ -54,7 +55,9 @@ def logout():
     session['user_id'] = ""
     session['user_name'] = ""
     session['email'] = ""
+    session['profilepath'] =""
     session.pop('user_id')
     session.pop('user_name')
     session.pop('email')
+    session.pop('profilepath')
     return redirect("/")
