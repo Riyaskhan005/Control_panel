@@ -1,5 +1,43 @@
 {% extends "base.html" %} {% block title %} Alimas | Settings {% endblock %}
 {% block body %}
+<!-- Font Awesome for pencil icon -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+  .profile-container {
+    position: relative;
+    display: inline-block;
+  }
+
+  .profile-user-img {
+    width: 120px;
+    height: 120px;
+  }
+.edit-icon {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  background-color: #007bff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  border: 2px solid white;
+  font-size: 14px;
+}
+
+  .edit-icon:hover {
+    background-color: #0056b3;
+  }
+
+  #profileImage {
+    display: none;
+  }
+</style>
 <div class="content-wrapper" style="min-height: 1604.8px;">
     
 
@@ -12,10 +50,20 @@
             <div class="card card-primary card-outline">
               <div class="card-body box-profile">
                 <div class="text-center">
-                  <img class="profile-user-img img-fluid img-circle" src="../static/images/logos/logo.png" alt="User profile picture">
+                   <div class="profile-container">
+                      <img class="profile-user-img" src="{{ session['profilepath'] }}" alt="User profile picture">
+
+                      <!-- Label acts as a button for file input -->
+                      <label for="profileImage" class="edit-icon">
+                        <i class="fas fa-pencil-alt"></i>
+                      </label>
+
+                      <!-- Hidden File Input -->
+                      <input type="file" id="profileImage" accept="image/*" onchange="uploadProfileImage(this)">
+                    </div>
                 </div>
 
-                <h3 class="profile-username text-center">Nina Mcintire</h3>
+                <h3 class="profile-username text-center">{{ session['user_name'] }}</h3>
 
               </div>
               <!-- /.card-body -->
@@ -69,4 +117,43 @@
         </div>
     </section>
     <!-- /.content -->
+     <script>
+       function uploadProfileImage(input) {
+  const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    const fileName = file.name.toLowerCase();
+    const fileExtension = fileName.split('.').pop();
+
+    if (!allowedExtensions.includes(fileExtension)) {
+      alert('Invalid file type. Only JPG, JPEG, PNG, and GIF are allowed.');
+      input.value = ''; // reset file input
+      return;
+    }
+
+    var formData = new FormData();
+    formData.append('profileImage', file);
+
+    $.ajax({
+      url: '/settings/upload_profile_image',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function(response) {
+        if (response.success) {
+          $('.profile-user-img').attr('src', response.image_url);
+          alert('Profile image updated successfully!');
+        } else {
+          alert('Image upload failed: ' + response.message);
+        }
+      },
+      error: function() {
+        alert('An error occurred while uploading the image.');
+      }
+    });
+  }
+}
+     </script>
 {%endblock%}
