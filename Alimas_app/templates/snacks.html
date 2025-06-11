@@ -69,17 +69,31 @@
 
                  
                   if (snackName.includes("chai")) {
-                      icon =  `<i class="fas fa-mug-hot"></i>`; 
+                      icon =  `<i class="fas fa-mug-hot"style="color: #000000;"></i>`; 
                   } else if (snackName.includes("burger")) {
-                      icon = `<i class="fas fa-hamburger"></i>`;
-                  } else if (snackName.includes("shawarma")||snackName.includes("roll")) {
+                      icon = `<i class="fas fa-hamburger"style="color: #000000;"></i>`;
+                  } else if (snackName =="shawarma"||snackName.includes("roll") && !snackName.includes("poori") ) {
                       icon = `<img src="../static/images/roll.svg" alt="Shawarma Icon" width="50" height="50">`; 
-                  } else if (snackName.includes("toast")) {
-                      icon = `<i class="fas fa-bread-slice"></i>`;
-                  } else if (snackName.includes("fried rice") || snackName.includes("noodles")) {
-                  icon = `<i class="fas fa-bowl-food"></i>`; 
-                  } else {
-                      icon =`<i class="fas fa-pizza-slice"></i>`;
+                  } else if (snackName.includes("poori") ) {
+                      icon = `<img src="../static/images/poori.svg" alt="Shawarma Icon" width="70" height="70">`; 
+                  }  else if (snackName.includes("toast")) {
+                      icon = `<img src="../static/images/toast.svg" alt="Shawarma Icon" width="50" height="50">`;
+                  }  else if (snackName.includes("yuqulaa")) {
+                      icon = `<img src="../static/images/yuqulaa.svg" alt="Shawarma Icon" width="70" height="70">`;
+                  } else if (snackName.includes("french fries")) {
+                      icon = `<img src="../static/images/french.svg" alt="Shawarma Icon" width="50" height="50">`;
+                  } else if (snackName.includes("muffin")) {
+                      icon = `<img src="../static/images/muffin.svg" alt="Shawarma Icon" width="70" height="70">`;
+                  } else if (snackName.includes("noodles")) {
+                      icon = `<img src="../static/images/noodles.svg" alt="Shawarma Icon" width="50" height="50">`; 
+                  } else if (snackName.includes("fried rice") || snackName.includes("biriyani") || snackName.includes("mandhi")) {
+                      icon = `<i class="fas fa-bowl-food"style="color: #000000;"></i>`; 
+                  }else if (snackName.includes("grill") || snackName.includes("rawaan")) {
+                      icon = `<img src="../static/images/chicken.svg" alt="Shawarma Icon" width="50" height="50">`; 
+                  }else if (snackName.includes("masalas")) {
+                      icon = `<img src="../static/images/masala.svg" alt="Shawarma Icon" width="70" height="70">`; 
+                  }else {
+                      icon =`<i class="fas fa-pizza-slice"style="color: #000000;"></i>`;
                   }
 
                     let tagText = snack.today_special === "true" ? "Active" : "InActive";

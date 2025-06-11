@@ -1,0 +1,19 @@
+<svg width="300" height="200" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- First puri -->
+  <circle cx="70" cy="100" r="50" stroke="white" stroke-width="3" fill="black" />
+  <ellipse cx="85" cy="80" rx="15" ry="8" stroke="white" stroke-width="2" fill="black" />
+  <circle cx="60" cy="110" r="4" fill="white" />
+  <circle cx="80" cy="120" r="3" fill="white" />
+
+  <!-- Second puri -->
+  <circle cx="150" cy="90" r="50" stroke="white" stroke-width="3" fill="black" />
+  <ellipse cx="165" cy="70" rx="15" ry="8" stroke="white" stroke-width="2" fill="black" />
+  <circle cx="140" cy="100" r="4" fill="white" />
+  <circle cx="160" cy="110" r="3" fill="white" />
+
+  <!-- Third puri -->
+  <circle cx="230" cy="100" r="50" stroke="white" stroke-width="3" fill="black" />
+  <ellipse cx="245" cy="80" rx="15" ry="8" stroke="white" stroke-width="2" fill="black" />
+  <circle cx="220" cy="110" r="4" fill="white" />
+  <circle cx="240" cy="120" r="3" fill="white" />
+</svg>

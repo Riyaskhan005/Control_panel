@@ -1,0 +1,22 @@
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Top vadai -->
+  <ellipse cx="200" cy="90" rx="50" ry="45" stroke="white" stroke-width="3" fill="black"/>
+  <circle cx="190" cy="80" r="4" fill="white"/>
+  <circle cx="210" cy="100" r="3" fill="white"/>
+  <circle cx="180" cy="105" r="3" fill="white"/>
+  <circle cx="205" cy="70" r="3" fill="white"/>
+
+  <!-- Bottom left vadai -->
+  <ellipse cx="150" cy="190" rx="50" ry="45" stroke="white" stroke-width="3" fill="black"/>
+  <circle cx="140" cy="180" r="4" fill="white"/>
+  <circle cx="160" cy="200" r="3" fill="white"/>
+  <circle cx="130" cy="205" r="3" fill="white"/>
+  <circle cx="155" cy="170" r="3" fill="white"/>
+
+  <!-- Bottom right vadai -->
+  <ellipse cx="250" cy="190" rx="50" ry="45" stroke="white" stroke-width="3" fill="black"/>
+  <circle cx="240" cy="180" r="4" fill="white"/>
+  <circle cx="260" cy="200" r="3" fill="white"/>
+  <circle cx="230" cy="205" r="3" fill="white"/>
+  <circle cx="255" cy="170" r="3" fill="white"/>
+</svg>

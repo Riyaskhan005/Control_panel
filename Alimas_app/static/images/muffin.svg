@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="150" height="150">
+  <!-- Top bun -->
+  <path d="M12 30 Q32 8 52 30 Q52 34 12 34 Z" fill="#000" stroke="#fff" stroke-width="1.2"/>
+  
+  <!-- Chicken stuffing -->
+  <path d="M14 34 Q32 28 50 34 Q50 36 14 36 Z" fill="#000" stroke="#fff" stroke-width="1.2"/>
+  
+  <!-- Butter stuffing layer -->
+  <path d="M16 36 Q32 32 48 36 Q48 38 16 38 Z" fill="#000" stroke="#fff" stroke-width="1.2"/>
+  
+  <!-- Extra juicy layer -->
+  <path d="M18 38 Q32 35 46 38 Q46 40 18 40 Z" fill="#000" stroke="#fff" stroke-width="1.2"/>
+  
+  <!-- Bottom bun -->
+  <path d="M12 42 Q16 54 48 54 Q52 42 12 42 Z" fill="#000" stroke="#fff" stroke-width="1.2"/>
+</svg>
