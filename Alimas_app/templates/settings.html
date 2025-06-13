@@ -88,11 +88,12 @@
                         </div>
                       </div>
                       <div class="form-group row mb-3">
-                        <label for="newpassword" class="col-sm-2 col-form-label">New Password</label>
-                        <div class="col-sm-4">
+                      <label for="newpassword" class="col-sm-2 col-form-label">New Password</label>
+                      <div class="col-sm-4">
                           <input type="password" class="form-control" id="newpassword" placeholder="New password">
-                        </div>
+                          <div id="passwordStrength" class="mt-1"></div>
                       </div>
+                  </div>
                       <div class="form-group row mb-3">
                         <label for="confirmpassword" class="col-sm-2 col-form-label">Confirm Password</label>
                         <div class="col-sm-4">
@@ -101,7 +102,7 @@
                       </div>
                       <div class="form-group row">
                         <div class="offset-sm-2 col-sm-10">
-                          <button type="submit" class="btn btn-danger">Update</button>
+                          <button type="button" class="btn btn-danger" onclick="changepassword()">Update</button>
                         </div>
                       </div>
                     </form>
@@ -127,7 +128,7 @@
     const fileExtension = fileName.split('.').pop();
 
     if (!allowedExtensions.includes(fileExtension)) {
-      alert('Invalid file type. Only JPG, JPEG, PNG, and GIF are allowed.');
+      showAlert('Invalid file type. Only JPG, JPEG, PNG, and GIF are allowed.','danger');
       input.value = ''; // reset file input
       return;
     }
@@ -144,16 +145,79 @@
       success: function(response) {
         if (response.success) {
           $('.profile-user-img').attr('src', response.image_url);
-          alert('Profile image updated successfully!');
+          showAlert('Profile image updated successfully!',"success");
         } else {
-          alert('Image upload failed: ' + response.message);
+          showAlert('Image upload failed: ' + response.message, 'danger');
         }
       },
       error: function() {
-        alert('An error occurred while uploading the image.');
+         showAlert('An error occurred while uploading the image.');
       }
     });
   }
+}
+
+function changepassword() {
+    var oldPassword = $('#oldpassword').val();
+    var newPassword = $('#newpassword').val();
+    var confirmPassword = $('#confirmpassword').val();
+    var strength = checkPasswordStrength(newPassword);
+
+    if (!oldPassword) {
+        showAlert("Enter new oldpassword", 'danger');
+    }
+
+    else if (!newPassword) {
+        showAlert("Enter new password", 'danger');
+    }
+    else if (!confirmPassword) {
+        showAlert("Enter new confirm password", 'danger');
+    }
+
+    else if (newPassword !== confirmPassword) {
+        showAlert("New password and confirm password do not match!", 'danger');
+    }
+
+    else if (strength < 3) {
+        showAlert("Password is too weak. Please choose a stronger password.", 'danger');
+    }
+    else{
+      $.ajax({
+        url: '/settings/change_password',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            old_password: oldPassword,
+            new_password: newPassword
+        }),
+        success: function (response) {
+            if (response.success) {
+                showAlert(response.message,"success");
+                $('#oldpassword').val('');
+                $('#newpassword').val('');
+                $('#confirmpassword').val('');
+                $('#passwordStrength').html('');
+            } else {
+                 showAlert(response.message,'danger');
+            }
+        },
+        error: function () {
+             showAlert('Something went wrong, please try again later.', 'danger');
+        }
+    });
+    }
+    
+}
+function checkPasswordStrength(password) {
+    var strength = 0;
+
+    if (password.length >= 8) strength++;
+    if (password.match(/[a-z]+/)) strength++;
+    if (password.match(/[A-Z]+/)) strength++;
+    if (password.match(/[0-9]+/)) strength++;
+    if (password.match(/[$@#&!]+/)) strength++;
+
+    return strength;
 }
      </script>
 {%endblock%}

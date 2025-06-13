@@ -40,3 +40,31 @@ def upload_profile_image():
     db.session.commit()
 
     return jsonify(success=True, image_url=relative_path)
+
+
+from flask import request, jsonify, session
+
+@bp.route('change_password', methods=['POST'])
+def change_password():
+    user_id = session.get('user_id')
+
+    if not user_id:
+        return jsonify({'success': False, 'message': 'User not logged in'})
+
+    data = request.get_json()
+    old_password = data.get('old_password')
+    new_password = data.get('new_password')
+
+    user = Users.query.filter_by(id=user_id).first()
+
+    if not user:
+        return jsonify({'success': False, 'message': 'User not found'})
+
+    if user.Password != old_password:
+        return jsonify({'success': False, 'message': 'Old password is incorrect'})
+
+    # update new password
+    user.Password = new_password
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': 'Password updated successfully'})
