@@ -33,4 +33,7 @@ def create_app(config_class=Config):
     from Alimas_app.settings import bp as settings_bp
     app.register_blueprint(settings_bp, url_prefix='/settings')
 
+    from Alimas_app.DailySales import bp as DailySales_bp
+    app.register_blueprint(DailySales_bp, url_prefix='/dailysales')
+
     return app
