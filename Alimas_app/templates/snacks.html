@@ -11,7 +11,6 @@
         style="top: -30px; left: -40px; width: 60px; height: 60px;">
         <i class="fas fa-hamburger fa-lg"></i> <!-- Burger icon -->
     </button>
-        <h3 class="mt-4 mb-2">Manage Snacks</h3>
         <div class="row" id="snackContainer">
         </div> 
 </div>
@@ -46,6 +45,7 @@
       <script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
      <link rel="stylesheet" href="https://cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
       <script>
+         $('#dynamicHeaderTitle').text("Manage Snacks");
         $(document).ready(function() {
           loadSnacks()
 

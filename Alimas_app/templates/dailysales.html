@@ -1,5 +1,117 @@
-{% extends "base.html" %} {% block title %}Alimas | Daily Sales {% endblock %}
+{% extends "base.html" %} {% block title %}Alimas | Sales Calculation {% endblock %}
 
-{% block body %}   
+{% block body %} 
+<style>
+    table.table-bordered {
+        border: 2px solid black !important;
+        border-collapse: collapse !important;
+    }
+    table.table-bordered th,
+    table.table-bordered td {
+        color: black !important;
+    }
+</style> 
+<div class="container">
+    <div class="card shadow-sm">
+        <div class="card-body">
 
+            <!-- Date Range is always visible -->
+            <div id="dateRangeSection" class="mb-4">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label>Start Date:</label>
+                        <input type="date" id="startDate" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label>End Date:</label>
+                        <input type="date" id="endDate" class="form-control" />
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button class="btn btn-primary" onclick="fetchSales()">Fetch Sales</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- This section will be hidden initially -->
+            <div id="resultSection" class="mt-4" style="display: none;">
+                <h5>Sales Summary:</h5>
+                <table id="salesTable" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Snack Name</th>
+                            <th>Quantity Sold</th>
+                        </tr>
+                    </thead>
+                    <tbody id="salesTableBody"></tbody>
+                </table>
+                <h5>Total Paid Amount: ₹ <span id="totalPaid"></span></h5>
+            </div>
+            <div id="exportSection" class="mt-3" style="display: none;">
+           <button class="btn btn-success" onclick="exportTableAsCSV()">Export to Excel</button>
+        </div>
+        </div>
+    </div>
+</div>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $('#dynamicHeaderTitle').text("Sales Calculation");
+    function fetchSales() {
+        const startDate = $('#startDate').val();
+        const endDate = $('#endDate').val();
+
+        if (!startDate || !endDate) {
+            alert("Please select both start and end dates");
+            return;
+        }
+
+        $.ajax({
+            url: "/dailysales/fetch_sales", 
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ start_date: startDate, end_date: endDate }),
+            success: function(data) {
+                $('#salesTableBody').empty();
+                if (data.snacks.length > 0) {
+                    $.each(data.snacks, function(index, item) {
+                        $('#salesTableBody').append(`<tr><td>${item.name}</td><td>${item.quantity}</td></tr>`);
+                    });
+                    $('#exportSection').show();
+                } else {
+                    $('#salesTableBody').append(`<tr><td colspan="2" class="text-center">No data found</td></tr>`);
+                    $('#exportSection').hide();
+                }
+                $('#totalPaid').text(data.total_paid);
+                $('#resultSection').show();
+            },
+            error: function(err) {
+                alert("Error fetching data");
+                $('#exportSection').hide();
+            }
+        });
+    }
+
+    function exportTableAsCSV() {
+    let rows = document.querySelectorAll("#salesTable tr");
+    let csvContent = "";
+
+    rows.forEach(row => {
+        let cols = row.querySelectorAll("td, th");
+        let rowData = [];
+        cols.forEach(col => {
+            rowData.push('"' + col.innerText.replace(/"/g, '""') + '"');
+        });
+        csvContent += rowData.join(",") + "\n";
+    });
+
+    let blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement("a");
+    a.href = url;
+    a.download = "sales_data.csv";
+    a.click();
+}
+</script>
 {%endblock%}

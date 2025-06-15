@@ -66,7 +66,7 @@
             <li class="sidebar-item">
               <a class="sidebar-link {% if request.path.startswith('/dailysales') %}active{% endif %}" href="/dailysales" aria-expanded="false">
                 <i class="ti ti-calculator"></i>
-                <span class="hide-menu">Daily Sales</span>
+                <span class="hide-menu">Sales Calculation</span>
               </a>
             </li>
             <li class="sidebar-item">
@@ -94,6 +94,7 @@
               </a>
             </li>
           </ul>
+           <div id="dynamicHeaderTitle" class="ms-3 fs-6 fw-bold text-dark"></div>
           <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
             <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
               <li class="nav-item dropdown">
