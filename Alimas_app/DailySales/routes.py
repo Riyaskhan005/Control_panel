@@ -28,7 +28,7 @@ def fetch_sales():
 
     results = CustomerEntry.query.filter(
         CustomerEntry.status == 'Active',
-        CustomerEntry.payment_status.in_(['Paid', 'Partial Paid']),
+        CustomerEntry.payment_status.in_(['Paid', 'Partial']),
         CustomerEntry.created_on >= start_datetime_str,
         CustomerEntry.created_on <= end_datetime_str
     ).all()
