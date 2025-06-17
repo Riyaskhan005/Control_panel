@@ -100,14 +100,14 @@ def generate_invoice():
         pdf.ln(5)
 
         pdf.set_fill_color(230, 230, 230)
-        pdf.set_font(style='B')
+        pdf.set_font('DejaVu', 'B')
         pdf.cell(10, 10, "No", 1, 0, 'C', True)
         pdf.cell(70, 10, "Item", 1, 0, 'C', True)
         pdf.cell(30, 10, "Qty", 1, 0, 'C', True)
         pdf.cell(30, 10, "Price", 1, 0, 'C', True)
         pdf.cell(40, 10, "Total", 1, 1, 'C', True)
 
-        pdf.set_font(style='')
+        pdf.set_font('DejaVu', '')
         for i, item in enumerate(snack_items, 1):
             total = item["quantity"] * item["price"]
             pdf.cell(10, 10, str(i), 1, 0, 'C')
@@ -119,13 +119,13 @@ def generate_invoice():
         pdf.ln(5)
 
         balance = entry.total_amount - entry.paid_amount
-        pdf.set_font(style='B')
+        pdf.set_font('DejaVu', 'B')
         pdf.cell(180, 10, f"Total Amount: ₹{entry.total_amount}", ln=True, align='R')
         pdf.cell(180, 10, f"Paid Amount: ₹{entry.paid_amount}", ln=True, align='R')
         pdf.cell(180, 10, f"Balance: ₹{balance}", ln=True, align='R')
 
         pdf.ln(10)
-        pdf.set_font(style='')
+        pdf.set_font('DejaVu', '')
         pdf.cell(200, 10, txt="Thank you for choosing Aalimas Thanthoori Chai!", ln=True, align='C')
 
         save_dir = os.path.join(current_app.root_path, 'static', 'media')
