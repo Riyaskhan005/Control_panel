@@ -138,7 +138,7 @@ def generate_invoice():
         buffer.seek(0)
 
         return send_file(buffer, as_attachment=True, mimetype='application/pdf',
-                         download_name=f'invoice_{entry.id}.pdf')
+                 download_name=f'invoice_{entry.id}.pdf')
 
     except Exception as e:
         print("Invoice Error:", e)

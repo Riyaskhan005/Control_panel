@@ -79,33 +79,16 @@
         </div>
       </div>
       
-      <div class="modal fade" id="shareModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content p-3">
-            <h5>Share via</h5>
-            <div class="d-flex justify-content-around mt-3">
-              <button onclick="shareToPlatform('whatsapp')" class="btn btn-success">
-                <i class="bi bi-whatsapp"></i> WhatsApp
-              </button>
-              <button onclick="shareToPlatform('email')" class="btn btn-primary">
-                <i class="bi bi-envelope"></i> Email
-              </button>
-              <!-- Add more platforms if needed -->
-            </div>
-          </div>
-        </div>
-      </div>
-      
 
 
       </div>
-      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-      <script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
-     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
 
-     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
 <script>
  $('#dynamicHeaderTitle').text("Customer Due");
@@ -225,8 +208,8 @@ function updateRemainingAmount() {
           return `
             <button class="btn btn-outline-info btn-sm m-1" data-id="${data}" data-name="${row.customer_name}" onclick="viewCustomer(${data}, '${row.customer_name}', ${row.total_amount}, '${row.payment_status}','${row.paid_amount}','${todaySpecialStr}')"><i class="ti ti-eye"></i></button>
             </button>
-            <button class="btn btn-outline-info btn-sm m-1" onclick="shareCustomer(${data})">
-              <i class="ti ti-share"></i>
+            <button class="btn btn-outline-info btn-sm m-1" onclick="downloadDetails(${data})">
+              <i class="ti ti-download"></i>
             </button>
           `;
         }
@@ -375,19 +358,12 @@ function cancel() {
   $('#partialAmount').val('').closest('.mb-3').hide();
   $('#remainingAmountLabel').hide();  
 }
-var selectedCustomerId = null; 
-function shareCustomer(id) {
-  selectedCustomerId = id;
-  $('#shareModal').modal('show');
-}
 
-function shareToPlatform(platform) {
+function downloadDetails(customerId) {
   $('#loaderOverlay').show();
- 
-  if (!selectedCustomerId) return;
 
   let formData = new FormData();
-  formData.append("customer_id", selectedCustomerId);
+  formData.append("customer_id", customerId);
 
   $.ajax({
     url: '/customerdues/generate_invoice',
@@ -396,41 +372,37 @@ function shareToPlatform(platform) {
     processData: false,
     contentType: false,
     xhrFields: {
-      responseType: 'blob'  // Expecting a file (PDF) as the response
+      responseType: 'blob' // Important for receiving binary file
     },
-    success: function(blob) {
-      const fileUrl = URL.createObjectURL(blob);
-
-      // URL encode the fileUrl to handle special characters
-      const encodedFileUrl = encodeURIComponent(fileUrl);
-
-      // If you want to allow the user to download the PDF and share it manually
-      if (platform === 'whatsapp') {
-        const whatsappURL = `https://wa.me/?text=Please find the invoice attached. Download the PDF: ${encodedFileUrl}`;
-        window.open(whatsappURL, '_blank');
-      } else if (platform === 'email') {
-        const emailURL = `mailto:?subject=Invoice&body=Please find the invoice attached. Download the PDF: ${encodedFileUrl}`;
-        window.open(emailURL, '_blank');
+    success: function(response, status, xhr) {
+      const blob = new Blob([response], { type: 'application/pdf' });
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      
+      // Try to extract filename from header
+      const disposition = xhr.getResponseHeader('Content-Disposition');
+      let fileName = `invoice_${customerId}.pdf`;
+      if (disposition && disposition.indexOf('filename=') !== -1) {
+        fileName = disposition.split('filename=')[1].replace(/["']/g, '');
       }
 
-      // Optionally, you can automatically prompt the user to download the PDF
-      const link = document.createElement('a');
-      link.href = fileUrl;
-      link.download = 'invoice.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      $('#shareModal').modal('hide');
-      $('#loaderOverlay').hide();
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(downloadUrl);
     },
     error: function(xhr, status, error) {
       console.error("Error generating invoice:", error);
-      alert("Failed to generate invoice");
-      $('#loaderOverlay').show();
+      showAlert("Failed to generate invoice. Please try again.", "error");
+    },
+    complete: function() {
+      $('#loaderOverlay').hide();
     }
   });
 }
+
 </script>
       
     
