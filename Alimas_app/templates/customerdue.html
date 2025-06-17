@@ -372,15 +372,13 @@ function downloadDetails(customerId) {
     processData: false,
     contentType: false,
     xhrFields: {
-      responseType: 'blob' // Important for receiving binary file
+      responseType: 'blob'
     },
     success: function(response, status, xhr) {
       const blob = new Blob([response], { type: 'application/pdf' });
       const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = downloadUrl;
-      
-      // Try to extract filename from header
       const disposition = xhr.getResponseHeader('Content-Disposition');
       let fileName = `invoice_${customerId}.pdf`;
       if (disposition && disposition.indexOf('filename=') !== -1) {
@@ -392,14 +390,13 @@ function downloadDetails(customerId) {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(downloadUrl);
+      $('#loaderOverlay').hide();
     },
     error: function(xhr, status, error) {
       console.error("Error generating invoice:", error);
       showAlert("Failed to generate invoice. Please try again.", "error");
-    },
-    complete: function() {
       $('#loaderOverlay').hide();
-    }
+    },
   });
 }
 
