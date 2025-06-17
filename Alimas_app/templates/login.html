@@ -1,6 +1,7 @@
 {% extends "base_auth.html" %} {% block title %}Alimas | Login{% endblock %}
 
 {% block body %}  
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
           <div class="col-md-8 col-lg-6 col-xxl-3">
            <div class="card mb-0 shadow rounded-3">
             <div class="card-body p-4">
@@ -20,10 +21,13 @@
                   <label for="Email" class="form-label">Email</label>
                   <input type="email" class="form-control" id="Email" placeholder="Enter your email">
                 </div>
-                <div class="mb-3">
-                  <label for="Password" class="form-label">Password</label>
+               <div class="mb-3">
+                <label for="Password" class="form-label">Password</label>
+                <div class="position-relative">
                   <input type="password" class="form-control" id="Password" placeholder="Enter your password">
+                  <i class="fa fa-eye toggle-password" data-target="Password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>
                 </div>
+              </div>
                 
                 <div class="d-flex justify-content-between align-items-center mb-3">
                   <div class="form-check">
@@ -56,6 +60,15 @@
           $('#Password').val(password);
           $('#rememberMe').prop('checked', true);
       }
+     
+      $(".toggle-password").click(function () {
+        const targetId = $(this).data("target");
+        const input = $("#" + targetId);
+        const type = input.attr("type") === "password" ? "text" : "password";
+        input.attr("type", type);
+
+        $(this).toggleClass("fa-eye fa-eye-slash");
+      });
   });
   $('#loginForm input').on('keypress', function (e) {
         if (e.which === 13) {

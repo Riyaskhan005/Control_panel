@@ -83,21 +83,32 @@
                     <form class="form-horizontal">
                       <div class="form-group row mb-3">
                         <label for="oldpassword" class="col-sm-2 col-form-label">Old Password</label>
-                        <div class="col-sm-4">
+                        <div class="col-sm-4 position-relative">
                           <input type="password" class="form-control" id="oldpassword" placeholder="Old password">
+                          <i class="fa fa-eye toggle-password" data-target="oldpassword" style="position: absolute; right: 23px; top: 13px; cursor: pointer;"></i>
                         </div>
                       </div>
                       <div class="form-group row mb-3">
-                      <label for="newpassword" class="col-sm-2 col-form-label">New Password</label>
-                      <div class="col-sm-4">
+                        <label for="newpassword" class="col-sm-2 col-form-label">New Password</label>
+                        <div class="col-sm-4 position-relative">
                           <input type="password" class="form-control" id="newpassword" placeholder="New password">
-                          <div id="passwordStrength" class="mt-1"></div>
+                          <i class="fa fa-eye toggle-password" data-target="newpassword" style="position: absolute; right: 23px; top: 13px; cursor: pointer;"></i>
+                          <div id="passwordRules" class="mt-2" style="font-size: 12px;display: none;">
+                            <ul style="list-style-type: none; padding-left: 0;margin-bottom:0%">
+                              <li id="rule-length" style="color: red;">✖ Minimum 8 characters</li>
+                              <li id="rule-lower" style="color: red;">✖ At least one lowercase letter</li>
+                              <li id="rule-upper" style="color: red;">✖ At least one uppercase letter</li>
+                              <li id="rule-number" style="color: red;">✖ At least one number</li>
+                              <li id="rule-special" style="color: red;">✖ At least one special character ($@#&!)</li>
+                            </ul>
+                          </div>
+                        </div>
                       </div>
-                  </div>
                       <div class="form-group row mb-3">
                         <label for="confirmpassword" class="col-sm-2 col-form-label">Confirm Password</label>
-                        <div class="col-sm-4">
+                        <div class="col-sm-4 position-relative">
                           <input type="password" class="form-control" id="confirmpassword" placeholder="Confirm password">
+                          <i class="fa fa-eye toggle-password" data-target="confirmpassword" style="position: absolute; right: 23px; top: 13px; cursor: pointer;"></i>
                         </div>
                       </div>
                       <div class="form-group row">
@@ -120,6 +131,17 @@
      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- /.content -->
      <script>
+       $(document).ready(function () {
+          $(".toggle-password").click(function () {
+            const targetId = $(this).data("target");
+            const input = $("#" + targetId);
+            const type = input.attr("type") === "password" ? "text" : "password";
+            input.attr("type", type);
+
+            // Toggle icon class
+            $(this).toggleClass("fa-eye fa-eye-slash");
+          });
+        });
        $('#dynamicHeaderTitle').text("Settings");
        function uploadProfileImage(input) {
   const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
@@ -158,6 +180,27 @@
     });
   }
 }
+ $("#newpassword").on("keyup", function () {
+      $('#passwordRules').show();
+      const password = $(this).val();
+      $("#rule-length").css("color", password.length >= 8 ? "green" : "red")
+        .text((password.length >= 8 ? "✔" : "✖") + " Minimum 8 characters");
+
+      $("#rule-lower").css("color", /[a-z]/.test(password) ? "green" : "red")
+        .text((/[a-z]/.test(password) ? "✔" : "✖") + " At least one lowercase letter");
+
+      $("#rule-upper").css("color", /[A-Z]/.test(password) ? "green" : "red")
+        .text((/[A-Z]/.test(password) ? "✔" : "✖") + " At least one uppercase letter");
+
+      $("#rule-number").css("color", /[0-9]/.test(password) ? "green" : "red")
+        .text((/[0-9]/.test(password) ? "✔" : "✖") + " At least one number");
+
+      $("#rule-special").css("color", /[$@#&!]/.test(password) ? "green" : "red")
+        .text((/[$@#&!]/.test(password) ? "✔" : "✖") + " At least one special character ($@#&!)");
+      if (password==""){
+        $('#passwordRules').hide();
+      }
+    });
 
 function changepassword() {
     var oldPassword = $('#oldpassword').val();
