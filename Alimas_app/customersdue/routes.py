@@ -134,7 +134,8 @@ def generate_invoice():
         pdf.output(local_path)
 
         buffer = io.BytesIO()
-        pdf.output(buffer)
+        pdf_output = pdf.output(dest='S').encode('latin1')
+        buffer.write(pdf_output)
         buffer.seek(0)
 
         return send_file(buffer, as_attachment=True, mimetype='application/pdf',
