@@ -63,7 +63,7 @@
         const endDate = $('#endDate').val();
 
         if (!startDate || !endDate) {
-            alert("Please select both start and end dates");
+            showAlert("Please select both start and end dates","danger");
             return;
         }
 
@@ -87,7 +87,7 @@
                 $('#resultSection').show();
             },
             error: function(err) {
-                alert("Error fetching data");
+                showAlert("Error fetching data","danger");
                 $('#exportSection').hide();
             }
         });
