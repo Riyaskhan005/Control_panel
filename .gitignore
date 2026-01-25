@@ -1,3 +1,7 @@
 __pycache__/
 __pycache__/__init__.cpython-38.pyc
 ControlPanelLogs
+Alimas_app/static/media/
+Alimas_app/static/uploads/
+Alimas_app/customersdue/
+
